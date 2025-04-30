@@ -1,0 +1,233 @@
+
+<!-- saved from url=(0262)https://121788204-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><!--<base target="_blank">--><base href="." target="_blank">
+
+  
+    
+    <title>Banner com Fogos de Artifício no Aniversário</title>
+    <style>
+      /* Zera margens e overflow */
+      html, body {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        width: 100%;
+        height: 100vh;
+      }
+
+      #banner-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      /* Banner no fundo (z-index:1) */
+      #banner-fixo {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: 1;
+      }
+
+      /* Texto acima do banner (z-index:2), centralizado e com fonte preta */
+      #comemoracao {
+        position: absolute;
+        z-index: 2;
+        top: 68%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        white-space: nowrap;
+        padding: 0 5vw;
+        color: #000;
+        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        font-size: 7vh;
+        font-weight: bold;
+        text-align: center;
+        text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.7);
+      }
+
+      /* Animação para o texto de aniversário */
+      @keyframes flash {
+        0% { color: blue; }
+        50% { color: black; }
+        100% { color: blue; }
+      }
+      .birthday {
+        animation: flash 0.5s infinite;
+      }
+
+      /* Container para efeitos visuais (z-index:3) */
+      .twinkle-lights {
+        position: absolute;
+        z-index: 3;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+
+      /* Estrelas (usadas em dias não aniversário) */
+      .twinkle-lights span {
+        position: absolute;
+        width: 8px;
+        height: 8px;
+        background: #fff;
+        clip-path: polygon(
+          50% 0%,
+          64.7% 29.8%,
+          97.6% 34.6%,
+          73.8% 57.7%,
+          79.4% 90.45%,
+          50% 75%,
+          20.6% 90.45%,
+          26.2% 57.7%,
+          2.45% 34.55%,
+          35.3% 29.78%
+        );
+        opacity: 0;
+        animation: blink 3s infinite ease-in-out;
+        box-shadow: 0 0 15px #fff, 0 0 30px #fff, 0 0 45px #fff, 0 0 60px #fff;
+      }
+      @keyframes blink {
+        0%   { opacity: 0.1; transform: scale(0.8); }
+        50%  { opacity: 1; transform: scale(1.2); }
+        100% { opacity: 0.1; transform: scale(0.8); }
+      }
+
+      /* Estilos para os fogos de artifício */
+      .firework {
+        position: absolute;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+      }
+      .firework-particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        opacity: 1;
+        animation: explode 1s ease-out forwards;
+      }
+      @keyframes explode {
+        from { transform: translate(0, 0); opacity: 1; }
+        to { transform: translate(var(--dx), var(--dy)); opacity: 0; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="banner-container">
+      <img id="banner-fixo" src="./PORTAL - v2.png" alt="Banner Fixo">
+      <p id="comemoracao" class="birthday">🥳 Feliz Aniversário, Diogo e André! 🥳</p>
+      <div class="twinkle-lights"><div class="firework" style="top: 82.6049%; left: 38.8035%;"><div class="firework-particle" style="--dx: -10.375201510776526px; --dy: 52.92959272535619px; background: rgb(0, 255, 34); box-shadow: rgb(0, 255, 34) 0px 0px 10px, rgb(0, 255, 34) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -82.2286431126371px; --dy: 15.535395249939565px; background: rgb(157, 0, 255); box-shadow: rgb(157, 0, 255) 0px 0px 10px, rgb(157, 0, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: 31.706482031400462px; --dy: 84.38599475929283px; background: rgb(0, 81, 255); box-shadow: rgb(0, 81, 255) 0px 0px 10px, rgb(0, 81, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -35.11180346810689px; --dy: 47.129812590226784px; background: rgb(0, 255, 157); box-shadow: rgb(0, 255, 157) 0px 0px 10px, rgb(0, 255, 157) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -6.576503326645417px; --dy: 79.6589763848495px; background: rgb(213, 0, 255); box-shadow: rgb(213, 0, 255) 0px 0px 10px, rgb(213, 0, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -65.4277677602109px; --dy: -36.47555127924111px; background: rgb(234, 255, 0); box-shadow: rgb(234, 255, 0) 0px 0px 10px, rgb(234, 255, 0) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -71.74397085850009px; --dy: -56.021438775658375px; background: rgb(255, 0, 98); box-shadow: rgb(255, 0, 98) 0px 0px 10px, rgb(255, 0, 98) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -82.54147922082988px; --dy: -43.09419829968371px; background: rgb(255, 0, 89); box-shadow: rgb(255, 0, 89) 0px 0px 10px, rgb(255, 0, 89) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: 6.449326372930904px; --dy: -62.769800924448006px; background: rgb(0, 255, 251); box-shadow: rgb(0, 255, 251) 0px 0px 10px, rgb(0, 255, 251) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -62.37045118889126px; --dy: -5.4399638586476975px; background: rgb(0, 115, 255); box-shadow: rgb(0, 115, 255) 0px 0px 10px, rgb(0, 115, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -52.61187747203783px; --dy: -3.8628711552392687px; background: rgb(85, 255, 0); box-shadow: rgb(85, 255, 0) 0px 0px 10px, rgb(85, 255, 0) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: 38.81996753287974px; --dy: -67.8147774281078px; background: rgb(94, 0, 255); box-shadow: rgb(94, 0, 255) 0px 0px 10px, rgb(94, 0, 255) 0px 0px 20px;"></div></div><div class="firework" style="top: 59.8547%; left: 58.3342%;"><div class="firework-particle" style="--dx: -67.98585794738864px; --dy: -21.309005998169877px; background: rgb(255, 17, 0); box-shadow: rgb(255, 17, 0) 0px 0px 10px, rgb(255, 17, 0) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -33.39423949757251px; --dy: -49.90375899066746px; background: rgb(98, 255, 0); box-shadow: rgb(98, 255, 0) 0px 0px 10px, rgb(98, 255, 0) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: 94.44983807095771px; --dy: -24.457789132479824px; background: rgb(255, 0, 55); box-shadow: rgb(255, 0, 55) 0px 0px 10px, rgb(255, 0, 55) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -49.65812547378737px; --dy: 43.98942916393233px; background: rgb(13, 255, 0); box-shadow: rgb(13, 255, 0) 0px 0px 10px, rgb(13, 255, 0) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: 34.04755724498631px; --dy: -63.024367003228164px; background: rgb(230, 0, 255); box-shadow: rgb(230, 0, 255) 0px 0px 10px, rgb(230, 0, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -53.10596432451049px; --dy: 25.73240024138624px; background: rgb(255, 0, 98); box-shadow: rgb(255, 0, 98) 0px 0px 10px, rgb(255, 0, 98) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -54.191327942637095px; --dy: 36.855839033857954px; background: rgb(162, 255, 0); box-shadow: rgb(162, 255, 0) 0px 0px 10px, rgb(162, 255, 0) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -50.65907195014364px; --dy: 42.13513040632735px; background: rgb(0, 255, 13); box-shadow: rgb(0, 255, 13) 0px 0px 10px, rgb(0, 255, 13) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -52.54058133723577px; --dy: 51.39164107338289px; background: rgb(9, 0, 255); box-shadow: rgb(9, 0, 255) 0px 0px 10px, rgb(9, 0, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -88.69220767396874px; --dy: 17.946343809680087px; background: rgb(247, 0, 255); box-shadow: rgb(247, 0, 255) 0px 0px 10px, rgb(247, 0, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: -0.5049845456610236px; --dy: 73.36621473455011px; background: rgb(0, 132, 255); box-shadow: rgb(0, 132, 255) 0px 0px 10px, rgb(0, 132, 255) 0px 0px 20px;"></div><div class="firework-particle" style="--dx: 37.425069824639046px; --dy: -51.790766582778026px; background: rgb(0, 26, 255); box-shadow: rgb(0, 26, 255) 0px 0px 10px, rgb(0, 26, 255) 0px 0px 20px;"></div></div></div>
+    </div>
+
+    <script>
+      // Banco de dados de mensagens e datas
+      const bancoDeDados = [
+        { data: new Date(2026, 0, 1), mensagem: "Feliz Ano Novo!" },
+        { data: new Date(2025, 3, 07), mensagem: "🥳 Feliz Aniversário, Rafaela Taborda! 🥳" },
+        { data: new Date(2025, 3, 12), mensagem: "🥳 Feliz Aniversário, Rhafael Mendes! 🥳" },
+        { data: new Date(2025, 3, 23), mensagem: "🥳 Feliz Aniversário, Selma Botelho! 🥳" },
+        { data: new Date(2025, 3, 25), mensagem: "🥳 Feliz Aniversário, Gabriel Freire! 🥳" },
+        { data: new Date(2025, 3, 26), mensagem: "🥳 Feliz Aniversário, Pedro Camargo! 🥳" },
+        { data: new Date(2025, 3, 28), mensagem: "🥳 Feliz Aniversário, Iasmim Ferreira! 🥳" },
+        { data: new Date(2025, 3, 30), mensagem: "🥳 Feliz Aniversário, Diogo e André! 🥳" },
+        { data: new Date(2025, 3, 09), mensagem: "🎉🦺 1 Ano Sem Acidentes 🦺🎉" },
+        { data: new Date(2025, 0, 00), mensagem: "🥳 Feliz Aniversário, Fillipe Soares! 🥳" },
+        { data: new Date(), mensagem: "#PSRindústria" }
+      ];
+
+      const dataAtual = new Date();
+      let isBirthday = false;
+      for (let i = 0; i < bancoDeDados.length; i++) {
+        const comemoracao = bancoDeDados[i];
+        if (
+          dataAtual.getDate() === comemoracao.data.getDate() &&
+          dataAtual.getMonth() === comemoracao.data.getMonth() &&
+          dataAtual.getFullYear() === comemoracao.data.getFullYear()
+        ) {
+          const elem = document.getElementById("comemoracao");
+          elem.textContent = comemoracao.mensagem;
+          if (comemoracao.mensagem.indexOf("Aniversário") !== -1) {
+            elem.classList.add("birthday");
+            isBirthday = true;
+          }
+          break;
+        }
+      }
+
+      // Função para criar estrelinhas (dias não aniversário)
+      function createStars() {
+        const container = document.querySelector('.twinkle-lights');
+        const numberOfStars = 20;
+        for (let i = 0; i < numberOfStars; i++) {
+          const star = document.createElement("span");
+          star.style.top = Math.random() * 100 + "%";
+          star.style.left = Math.random() * 100 + "%";
+          star.style.animationDelay = Math.random() * 3 + "s";
+          star.style.animationDuration = (2 + Math.random() * 3) + "s";
+          star.addEventListener("animationiteration", function() {
+            this.style.top = Math.random() * 100 + "%";
+            this.style.left = Math.random() * 100 + "%";
+          });
+          container.appendChild(star);
+        }
+      }
+
+      // Função para criar fogos de artifício (dias de aniversário)
+      function createFireworks() {
+        const container = document.querySelector('.twinkle-lights');
+        container.innerHTML = ""; // limpa conteúdo anterior
+        // Cria fogos de artifício a cada 500ms
+        setInterval(function() {
+          spawnFirework();
+        }, 500);
+      }
+
+      // Cria um único fogo de artifício com várias partículas coloridas
+      function spawnFirework() {
+        const container = document.querySelector('.twinkle-lights');
+        const firework = document.createElement("div");
+        firework.className = "firework";
+        firework.style.top = Math.random() * 100 + "%";
+        firework.style.left = Math.random() * 100 + "%";
+        container.appendChild(firework);
+        const particleCount = 12;
+        for (let i = 0; i < particleCount; i++) {
+          const particle = document.createElement("div");
+          particle.className = "firework-particle";
+          const angle = Math.random() * Math.PI * 2;
+          const distance = 50 + Math.random() * 50;
+          particle.style.setProperty("--dx", Math.cos(angle) * distance + "px");
+          particle.style.setProperty("--dy", Math.sin(angle) * distance + "px");
+          // Define cor aleatória para cada partícula
+          const randomHue = Math.floor(Math.random() * 360);
+          const color = `hsl(${randomHue}, 100%, 50%)`;
+          particle.style.background = color;
+          particle.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
+          firework.appendChild(particle);
+        }
+        // Remove o fogo após a animação (1 segundo)
+        setTimeout(function() {
+          firework.remove();
+        }, 1000);
+      }
+
+      window.onload = function() {
+        if (isBirthday) {
+          createFireworks();
+        } else {
+          createStars();
+        }
+      };
+    </script>
+  
+
+</body></html>
