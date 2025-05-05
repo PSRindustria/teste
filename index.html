@@ -1,2314 +1,515 @@
-<html>
-  <head>
-    <meta charset=&quot;utf-8&quot;>
-    <title>Banner com Fogos de Artifício no Aniversário</title>
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador de Processos</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
     <style>
-      /* Zera margens e overflow */
-      html, body {
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        width: 100%;
-        height: 100vh;
-      }
-
-      #banner-container {
-        position: relative;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      }
-
-      /* Banner no fundo (z-index:1) */
-      #banner-fixo {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: 1;
-      }
-
-      /* Texto acima do banner (z-index:2), centralizado e com fonte preta */
-      #comemoracao {
-        position: absolute;
-        z-index: 2;
-        top: 68%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        white-space: nowrap;
-        padding: 0 5vw;
-        color: #000;
-        font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-        font-size: 7vh;
-        font-weight: bold;
-        text-align: center;
-        text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.7);
-      }
-
-      /* Animação para o texto de aniversário */
-      @keyframes flash {
-        0% { color: blue; }
-        50% { color: black; }
-        100% { color: blue; }
-      }
-      .birthday {
-        animation: flash 0.5s infinite;
-      }
-
-      /* Container para efeitos visuais (z-index:3) */
-      .twinkle-lights {
-        position: absolute;
-        z-index: 3;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-      }
-
-      /* Estrelas (usadas em dias não aniversário) */
-      .twinkle-lights span {
-        position: absolute;
-        width: 8px;
-        height: 8px;
-        background: #fff;
-        clip-path: polygon(
-          50% 0%,
-          64.7% 29.8%,
-          97.6% 34.6%,
-          73.8% 57.7%,
-          79.4% 90.45%,
-          50% 75%,
-          20.6% 90.45%,
-          26.2% 57.7%,
-          2.45% 34.55%,
-          35.3% 29.78%
-        );
-        opacity: 0;
-        animation: blink 3s infinite ease-in-out;
-        box-shadow: 0 0 15px #fff, 0 0 30px #fff, 0 0 45px #fff, 0 0 60px #fff;
-      }
-      @keyframes blink {
-        0%   { opacity: 0.1; transform: scale(0.8); }
-        50%  { opacity: 1; transform: scale(1.2); }
-        100% { opacity: 0.1; transform: scale(0.8); }
-      }
-
-      /* Estilos para os fogos de artifício */
-      .firework {
-        position: absolute;
-        width: 0;
-        height: 0;
-        pointer-events: none;
-      }
-      .firework-particle {
-        position: absolute;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        opacity: 1;
-        animation: explode 1s ease-out forwards;
-      }
-      @keyframes explode {
-        from { transform: translate(0, 0); opacity: 1; }
-        to { transform: translate(var(--dx), var(--dy)); opacity: 0; }
-      }
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-light: #f3f4f6;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-light);
+        }
+        
+        .card {
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .calendar-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .priority-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .priority-card {
+            border-left: 4px solid var(--danger);
+        }
+        
+        .upcoming-card {
+            border-left: 4px solid var(--warning);
+        }
+        
+        .status-badge {
+            border-radius: 12px;
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-priority {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        
+        .status-concluido {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-pendente {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-default {
+            background-color: #e0e7ff;
+            color: #4338ca;
+        }
+        
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .comment-field {
+            transition: all 0.2s ease;
+        }
+        
+        .comment-field:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+        
+        .refresh-btn {
+            background-color: var(--primary);
+            color: white;
+            border-radius: 8px;
+            padding: 8px 16px;
+            transition: all 0.2s ease;
+        }
+        
+        .refresh-btn:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .instructions {
+            background-color: #e0f2fe;
+            border-left: 4px solid #0284c7;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+        }
     </style>
-  </head>
-
-  <body>
-    <div id=&quot;banner-container&quot;>
-      <img
-        id=&quot;banner-fixo&quot;
-        src=&quot;https://lh3.googleusercontent.com/fife/ALs6j_F9g5IZ3ZCcPi9aivJG1tp_iXEs1hU-urLPN9FbJTOHrjNlPDFNoiB-xe7F7iavkhRa3qpdkEqBijQpnFWmrQGrEE0MCfIGpw8zhKriIjEqGFfEOXh36reLA656wbTbPMj0OKLXTYYLmxm7MsKG_ES0YEnZ-T_LpcmRjYFv0krG4UbhTmVs0XwEQGe1eIcJ4wdsnmVi7cbr9WjqL2raMyb-wfy4U3sfYFCZTNefK4wL6IFQEQlKA_78A_sN3Lnr4YNiC6_59yYdzOyEuEZkGBSCFS8doL0QT2a2eSw1JKIMQzmdTbAM5qqSDWb84HrvPgcYVhXmt4ZHwwH33Dm4yz7qfgqclT6syf3VLgd8ELv9zU_HDfSs4v8iy6-kNe8U4DxkN3eQdZrgiy4KwR4AcVG_E1NmjR2zpBPaLq8iB29KmzZ1RXr-LJTMHUeSaJZwpV0BHCUcmnV_MjfLy4Q6M-lqBmO06eLZ5NlCGWDO_0oRYBjYoDbocQEXOhsJF3AfMMdn9hoMw4NE_A3YLlBi9zIkgpIW1LDfpkcd3fA06LgGQI1UxsYh8xzGYnZdeuvvUY7izjAQMJQ-jazZ65wtm4egGjvurL-AiblCtH9bVZGqP3xemeIrYxchWt4DQMdLv_61sQij2RRJaD5eDojq8Q6O8fbI01WtxLM-0AB4_WknAPs4X4SBNkFgCRhbLXwvM2phuudAvFZwAuWcrmeuCITecsM6jygiO4pJm_pMQ04wZ9j_V_4HH73qzAvGWAI-5gf62dSD3pTCvaUJWQwM-22blKVTt5wD6NutNnzPaQn9A-Fb-m4dxOu5vLxCvUCudZvCVjy7pNNoaz9oSw6SXLvTNnGYNXh3r4Oq58SREvNa7MPkHOpurM1CfD8vHxF86gh5bYz2e021g1XgMUvVQG-HZbMm_qossVBH8SslZDFlbUFnoSYbHftG7Yxr7K_EELBhf4Gk78zwatbLkcuX7dWhUmwO133-NjQWlPuPSWqIhtVNQrenXzkOgtfR-5XBKQmVW-c_n2ycPZBiCQ5tAFQOZBSmHWAXWJDUpG237DkKZxL85q_NUFpz7E8B-auE2-qp6iN4OaKzqSog7lwJNVYqJoqW87wlWEjAudMGrhF3H40RrzxTZwS1vefdWbZFryDNnSNlmCCWM86l0e9VQ89c4SQJHqXoNhkWitmOnFRqfKe0U2wIr4OWIMjdjGXj8ArlkV98zbqmz4Kkf73cJsNuHKAjTFEAX8UvGFCNex02u7Dc1XvHY840tTTuLV_vdZwMj7YfM0ZQZF09x25zKqFXC7X04yxH9ey-DfovzIYGPhTJfqIyi1OahQPP6R3rSgt78TPTHUDZUMmU5ACqtVrQ6nsdZSgvboUVW5XSRb5wZcp9mCT9jLLnuEW5keyrzvcTkMA9vt1LUN_zLXW7tLgyEiVqjjyTOzFpR5PZ3HolI_or_vtZnybZ3ZMeiltqvpquyjkJyGqxXKsvloWGx2gMzq4isYb_oAnvFbxQ_O7QjvYmNWGmv4Glv-TmcNj5Js43eqYMxK15iEwaOXwVhrdLDf2N7GOH1do71zC0x0uwxt34-dNQC3zgYqbnI0C4846sqlHTl75BKTeX-713ITJu4Hsy7y4eP2PzbQNB_stlZUoGdwDGl-8R=w1920-h878&quot;
-        alt=&quot;Banner Fixo&quot;
-      >
-      <p id=&quot;comemoracao&quot;></p>
-      <div class=&quot;twinkle-lights&quot;></div>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Gerenciador de Processos</h1>
+            <p class="text-gray-600">Organize seus processos e acompanhe prazos importantes</p>
+        </header>
+        
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800">Painel de Controle</h2>
+            <button id="refreshBtn" class="refresh-btn">
+                <i class="fas fa-sync-alt mr-2"></i>Atualizar Dados
+            </button>
+        </div>
+        
+        <div id="loading" class="loader"></div>
+        <div id="error" class="bg-red-100 text-red-700 p-4 rounded-lg mb-8 text-center hidden"></div>
+        
+        <div id="dashboard" class="hidden">
+            <section class="calendar-section">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-800">Calendário de Processos</h2>
+                </div>
+                <div id="calendar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <!-- Cards do calendário serão inseridos aqui pelo JavaScript -->
+                </div>
+            </section>
+            
+            <section class="priority-section">
+                <h2 class="text-xl font-bold text-gray-800 mb-6">Prioridades e Prazos Próximos</h2>
+                <div id="priorities" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards de prioridade serão inseridos aqui pelo JavaScript -->
+                </div>
+            </section>
+        </div>
     </div>
 
     <script>
-      // Banco de dados de mensagens e datas
-      const bancoDeDados = [
-        { data: new Date(2026, 0, 1), mensagem: &quot;Feliz Ano Novo!&quot; },
-        { data: new Date(2025, 3, 07), mensagem: &quot;🥳 Feliz Aniversário, Rafaela Taborda! 🥳&quot; },
-        { data: new Date(2025, 3, 12), mensagem: &quot;🥳 Feliz Aniversário, Rhafael Mendes! 🥳&quot; },
-        { data: new Date(2025, 3, 23), mensagem: &quot;🥳 Feliz Aniversário, Selma Botelho! 🥳&quot; },
-        { data: new Date(2025, 3, 25), mensagem: &quot;🥳 Feliz Aniversário, Gabriel Freire! 🥳&quot; },
-        { data: new Date(2025, 3, 26), mensagem: &quot;🥳 Feliz Aniversário, Pedro Camargo! 🥳&quot; },
-        { data: new Date(2025, 3, 28), mensagem: &quot;🥳 Feliz Aniversário, Iasmim Ferreira! 🥳&quot; },
-        { data: new Date(2025, 3, 30), mensagem: &quot;🥳 Feliz Aniversário, Diogo e André! 🥳&quot; },
-        { data: new Date(2025, 3, 09), mensagem: &quot;🎉🦺 1 Ano Sem Acidentes 🦺🎉&quot; },
-        { data: new Date(2025, 0, 00), mensagem: &quot;🥳 Feliz Aniversário, Fillipe Soares! 🥳&quot; },
-        { data: new Date(), mensagem: &quot;#PSRindústria&quot; }
-      ];
-
-      const dataAtual = new Date();
-      let isBirthday = false;
-      for (let i = 0; i < bancoDeDados.length; i++) {
-        const comemoracao = bancoDeDados[i];
-        if (
-          dataAtual.getDate() === comemoracao.data.getDate() &amp;&amp;
-          dataAtual.getMonth() === comemoracao.data.getMonth() &amp;&amp;
-          dataAtual.getFullYear() === comemoracao.data.getFullYear()
-        ) {
-          const elem = document.getElementById(&quot;comemoracao&quot;);
-          elem.textContent = comemoracao.mensagem;
-          if (comemoracao.mensagem.indexOf(&quot;Aniversário&quot;) !== -1) {
-            elem.classList.add(&quot;birthday&quot;);
-            isBirthday = true;
-          }
-          break;
+        // Configurações
+        const MS_PER_DAY = 1000 * 60 * 60 * 24;
+        const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
+        const UPCOMING_DAYS = 5; // Dias para considerar como "próximos"
+        
+        // Elementos DOM
+        const refreshBtn = document.getElementById('refreshBtn');
+        const loadingEl = document.getElementById('loading');
+        const errorEl = document.getElementById('error');
+        const dashboardEl = document.getElementById('dashboard');
+        const calendarEl = document.getElementById('calendar');
+        const prioritiesEl = document.getElementById('priorities');
+        
+        // Estado da aplicação
+        let sheetData = [];
+        let sheetUrl = '';
+        let refreshTimer = null;
+        
+        // Função para formatar data
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return dateStr;
+            
+            const day = parts[0].padStart(2, '0');
+            const month = parts[1].padStart(2, '0');
+            const year = parts[2];
+            
+            return `${day}/${month}/${year}`;
         }
-      }
-
-      // Função para criar estrelinhas (dias não aniversário)
-      function createStars() {
-        const container = document.querySelector('.twinkle-lights');
-        const numberOfStars = 20;
-        for (let i = 0; i < numberOfStars; i++) {
-          const star = document.createElement(&quot;span&quot;);
-          star.style.top = Math.random() * 100 + &quot;%&quot;;
-          star.style.left = Math.random() * 100 + &quot;%&quot;;
-          star.style.animationDelay = Math.random() * 3 + &quot;s&quot;;
-          star.style.animationDuration = (2 + Math.random() * 3) + &quot;s&quot;;
-          star.addEventListener(&quot;animationiteration&quot;, function() {
-            this.style.top = Math.random() * 100 + &quot;%&quot;;
-            this.style.left = Math.random() * 100 + &quot;%&quot;;
-          });
-          container.appendChild(star);
+        
+        // Função para verificar se uma data está próxima
+        function isUpcoming(dateStr) {
+            if (!dateStr) return false;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return false;
+            
+            const processDate = new Date(
+                parseInt(parts[2]), // ano
+                parseInt(parts[1]) - 1, // mês (0-11)
+                parseInt(parts[0]) // dia
+            );
+            
+            const diffDays = Math.floor((processDate - today) / MS_PER_DAY);
+            return diffDays >= 0 && diffDays <= UPCOMING_DAYS;
         }
-      }
-
-      // Função para criar fogos de artifício (dias de aniversário)
-      function createFireworks() {
-        const container = document.querySelector('.twinkle-lights');
-        container.innerHTML = &quot;&quot;; // limpa conteúdo anterior
-        // Cria fogos de artifício a cada 500ms
-        setInterval(function() {
-          spawnFirework();
-        }, 500);
-      }
-
-      // Cria um único fogo de artifício com várias partículas coloridas
-      function spawnFirework() {
-        const container = document.querySelector('.twinkle-lights');
-        const firework = document.createElement(&quot;div&quot;);
-        firework.className = &quot;firework&quot;;
-        firework.style.top = Math.random() * 100 + &quot;%&quot;;
-        firework.style.left = Math.random() * 100 + &quot;%&quot;;
-        container.appendChild(firework);
-        const particleCount = 12;
-        for (let i = 0; i < particleCount; i++) {
-          const particle = document.createElement(&quot;div&quot;);
-          particle.className = &quot;firework-particle&quot;;
-          const angle = Math.random() * Math.PI * 2;
-          const distance = 50 + Math.random() * 50;
-          particle.style.setProperty(&quot;--dx&quot;, Math.cos(angle) * distance + &quot;px&quot;);
-          particle.style.setProperty(&quot;--dy&quot;, Math.sin(angle) * distance + &quot;px&quot;);
-          // Define cor aleatória para cada partícula
-          const randomHue = Math.floor(Math.random() * 360);
-          const color = `hsl(${randomHue}, 100%, 50%)`;
-          particle.style.background = color;
-          particle.style.boxShadow = `0 0 10px ${color}, 0 0 20px ${color}`;
-          firework.appendChild(particle);
+        
+        // Função para verificar se uma data está no passado
+        function isPast(dateStr) {
+            if (!dateStr) return false;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const parts = dateStr.split('/');
+            if (parts.length !== 3) return false;
+            
+            const processDate = new Date(
+                parseInt(parts[2]), // ano
+                parseInt(parts[1]) - 1, // mês (0-11)
+                parseInt(parts[0]) // dia
+            );
+            
+            return processDate < today;
         }
-        // Remove o fogo após a animação (1 segundo)
-        setTimeout(function() {
-          firework.remove();
-        }, 1000);
-      }
-
-      window.onload = function() {
-        if (isBirthday) {
-          createFireworks();
-        } else {
-          createStars();
+        
+        // Função para criar um card
+        function createCard(process, index) {
+                            const isPriority = process.status && process.status.toLowerCase().includes('prioridade');
+            const isUpcomingDate = isUpcoming(process.data);
+            const isPastDate = isPast(process.data);
+            
+            // Determinar classes para o status
+            let statusClass = 'status-default';
+            if (process.status) {
+                const status = process.status.toLowerCase();
+                if (status.includes('prioridade')) {
+                    statusClass = 'status-priority';
+                } else if (status === 'concluído' || status === 'concluido') {
+                    statusClass = 'status-concluido';
+                } else if (status === 'pendente') {
+                    statusClass = 'status-pendente';
+                }
+            }
+            
+            // Criar elemento do card
+            const card = document.createElement('div');
+            card.className = `card bg-white ${isPriority ? 'priority-card' : ''} ${isUpcomingDate && !isPriority ? 'upcoming-card' : ''}`;
+            
+            // Estrutura interna do card
+            card.innerHTML = `
+                <div class="p-5">
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="font-bold text-gray-800 text-lg">${process.nome || 'Sem nome'}</h3>
+                        <span class="status-badge ${statusClass}">${process.status || 'Sem status'}</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p class="text-sm text-gray-500 flex items-center mb-1">
+                            <i class="far fa-calendar-alt mr-2"></i>
+                            <span class="${isPastDate ? 'text-red-600 font-semibold' : ''}">${formatDate(process.data) || 'Sem data'}</span>
+                        </p>
+                        <p class="text-sm text-gray-500 flex items-center">
+                            <i class="far fa-comment-dots mr-2"></i>
+                            <span>${process.assunto || 'Sem assunto'}</span>
+                        </p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm text-gray-600">${process.observacao || 'Sem observações'}</p>
+                    </div>
+                    
+                    ${process.link ? `
+                    <div class="mb-4">
+                        <a href="${process.link}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
+                            <i class="fas fa-external-link-alt mr-1"></i> Ver arte no Drive
+                        </a>
+                    </div>
+                    ` : ''}
+                    
+                    <div class="mt-4">
+                        <label for="comment-${index}" class="block text-sm font-medium text-gray-700 mb-1">Comentário:</label>
+                        <textarea 
+                            id="comment-${index}" 
+                            class="comment-field w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none" 
+                            rows="2"
+                            data-row-index="${index + 1}"
+                        >${process.comentarios || ''}</textarea>
+                        <button 
+                            class="mt-2 bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600 save-comment-btn"
+                            data-index="${index}"
+                        >
+                            Salvar
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
         }
-      };
+        
+        // Função para carregar dados da planilha
+        async function loadSheetData() {
+            if (!sheetUrl) {
+                displayError('URL da planilha não fornecida');
+                return;
+            }
+            
+            loadingEl.classList.remove('hidden');
+            errorEl.classList.add('hidden');
+            
+            try {
+                // Tentativa de carregar os dados da planilha publicada como CSV
+                const response = await fetch(sheetUrl);
+                
+                if (!response.ok) {
+                    throw new Error('Erro ao acessar a planilha. Verifique se ela está publicada corretamente.');
+                }
+                
+                const csvText = await response.text();
+                
+                // Conversão básica de CSV para array de objetos
+                const rows = csvText.split('\n');
+                const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
+                
+                sheetData = [];
+                
+                for (let i = 1; i < rows.length; i++) {
+                    if (!rows[i].trim()) continue;
+                    
+                    const values = rows[i].split(',');
+                    const process = {};
+                    
+                    headers.forEach((header, index) => {
+                        if (index < values.length) {
+                            // Obter o valor e lidar com campos que podem conter vírgulas (entre aspas)
+            let value = '';
+            
+            // Se o valor começa com aspas, precisamos tratar diferente
+            if (values[index] && values[index].trim().startsWith('"')) {
+                // Encontrar o final do valor (próxima aspas seguida de vírgula ou final)
+                let valueBuilder = [values[index]];
+                let valueComplete = false;
+                let j = index;
+                
+                while (!valueComplete && j < values.length) {
+                    if (values[j].endsWith('"') || values[j].includes('",')) {
+                        valueComplete = true;
+                    } else if (j < values.length - 1) {
+                        j++;
+                        valueBuilder.push(values[j]);
+                    } else {
+                        valueComplete = true;
+                    }
+                }
+                
+                value = valueBuilder.join(',').trim();
+            } else {
+                value = values[index] ? values[index].trim() : '';
+                            
+                            // Remover aspas se existirem
+                            if (value.startsWith('"') && value.endsWith('"')) {
+                                value = value.substring(1, value.length - 1);
+                            }
+                            
+                            // Mapear cabeçalhos para nossos campos esperados
+                            if (header === 'a' || header === 'nome') {
+                                process.nome = value;
+                            } else if (header === 'b' || header === 'data') {
+                                process.data = value;
+                            } else if (header === 'c' || header === 'assunto') {
+                                process.assunto = value;
+                            } else if (header === 'd' || header === 'status') {
+                                process.status = value;
+                            } else if (header === 'e' || header === 'observacao' || header === 'observação') {
+                                process.observacao = value;
+                            } else if (header === 'f' || header === 'link') {
+                                process.link = value;
+                            } else if (header === 'g' || header === 'comentarios' || header === 'comentários') {
+                                process.comentarios = value;
+                            } else {
+                                process[header] = value;
+                            }
+                        }
+                    });
+                    
+                    sheetData.push(process);
+                }
+                
+                renderCards();
+                dashboardEl.classList.remove('hidden');
+                
+                // Configurar atualização automática
+                if (refreshTimer) {
+                    clearInterval(refreshTimer);
+                }
+                refreshTimer = setInterval(loadSheetData, REFRESH_INTERVAL);
+                
+            } catch (error) {
+                console.error('Erro ao carregar dados:', error);
+                displayError(error.message);
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+        
+        // Função para exibir erro
+        function displayError(message) {
+            errorEl.textContent = message;
+            errorEl.classList.remove('hidden');
+            dashboardEl.classList.add('hidden');
+        }
+        
+        // Adicionar funcionalidade para salvar comentários de volta na planilha
+        async function saveCommentToSheet(rowIndex, columnIndex, comment) {
+            // Esta é uma função simulada, já que precisaríamos da API Google Sheets completa
+            // para realmente escrever de volta na planilha
+            console.log(`Salvando comentário na linha ${rowIndex}, coluna ${columnIndex}: ${comment}`);
+            return true;
+        }
+        
+        // Função para renderizar os cards
+        function renderCards() {
+            // Limpar contêineres
+            calendarEl.innerHTML = '';
+            prioritiesEl.innerHTML = '';
+            
+            if (sheetData.length === 0) {
+                calendarEl.innerHTML = '<p class="col-span-full text-center text-gray-500">Nenhum processo encontrado</p>';
+                prioritiesEl.innerHTML = '<p class="col-span-full text-center text-gray-500">Nenhuma prioridade encontrada</p>';
+                return;
+            }
+            
+            // Verificar prioridades e datas próximas
+            let hasPriorities = false;
+            
+            // Criar cards para todos os processos no calendário
+            sheetData.forEach((process, index) => {
+                const card = createCard(process, index);
+                calendarEl.appendChild(card);
+                
+                // Verificar se é prioridade ou tem data próxima
+                const isPriority = process.status && process.status.toLowerCase().includes('prioridade');
+                const isUpcomingDate = isUpcoming(process.data);
+                
+                if (isPriority || isUpcomingDate) {
+                    const priorityCard = createCard(process, index);
+                    prioritiesEl.appendChild(priorityCard);
+                    hasPriorities = true;
+                }
+            });
+            
+            // Se não houver prioridades
+            if (!hasPriorities) {
+                prioritiesEl.innerHTML = '<p class="col-span-full text-center text-gray-500">Nenhuma prioridade ou prazo próximo encontrado</p>';
+            }
+            
+            // Adicionar eventos aos botões de salvar comentários
+            document.querySelectorAll('.save-comment-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    const textarea = document.getElementById(`comment-${index}`);
+                    const comment = textarea.value.trim();
+                    
+                    // Salvando o comentário
+                    const rowIndex = parseInt(textarea.getAttribute('data-row-index'));
+                    const savedSuccessfully = saveCommentToSheet(rowIndex, 7, comment); // Coluna G = 7
+                    
+                    if (savedSuccessfully) {
+                        // Mostrar uma notificação de sucesso
+                        const btn = this;
+                        btn.textContent = "Salvo!";
+                        btn.classList.add("bg-blue-500");
+                        btn.classList.remove("bg-green-500");
+                        
+                        setTimeout(() => {
+                            btn.textContent = "Salvar";
+                            btn.classList.add("bg-green-500");
+                            btn.classList.remove("bg-blue-500");
+                        }, 2000);
+                    }
+                    
+                    // Atualizar dados locais
+                    sheetData[index].comentarios = comment;
+                });
+            });
+        }
+        
+        // Configurar eventos
+        refreshBtn.addEventListener('click', loadSheetData);
+        
+        refreshBtn.addEventListener('click', loadSheetData);
+        
+        // Usar diretamente a URL da planilha fornecida
+        sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vShqjOLg7SmO5NW8kJ4zYkzGRebV_45SXow4XxRrGKoocbN4Ybba9Db2RC6RU8ICQnx0E9SZPhWTvps/pub?gid=0&single=true&output=csv";
+        
+        // Carregar dados automaticamente ao iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSheetData();
+        });
     </script>
-  </body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="75cf69e862e784a9_62" name="75cf69e862e784a9_62" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=625826676"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div></div></div></section><section id="h.b8d18726703e522_49" class="yaqOZd"><div class="IFuOkc"></div><div class="mYVXT"><div class="LS81yb VICjCf j5pSsc db35Fc" tabindex="-1"><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb purZT-AhqUyc-II5mzb ZcASvf-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.36ab5204784de513_0" class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 34.1772151899%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html> 
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Calendário Centralizado</title>
-  <!-- Importa a fonte Poppins do Google Fonts -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Poppins', sans-serif;
-    }
-    .outer-wrapper {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background-color: #f9f9f9;
-      padding: 10px;
-    }
-    .calendar-container {
-      display: flex;
-      gap: 0.5rem;
-      width: 100%;
-      max-width: 600px;
-    }
-    .day-box {
-      flex: 1 1 0;
-      height: 75px;
-      background-color: #003366;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      border-radius: 15px;
-      font-weight: 600;
-      text-align: center;
-      font-size: clamp(1rem, 1.5vw, 1.5rem);
-      padding: 3px;
-      transition: border 0.2s;
-    }
-    /* Hoje em destaque laranja */
-    .day-box.highlight {
-      background-color: #ffb600;
-      color: #444;
-    }
-    /* Feriados (não hoje) em verde */
-    .day-box.holiday {
-      background-color: #a3d5a2 !important;
-      color: #333 !important;
-    }
-    /* Hoje feriado: verde + contorno laranja (#ffb600) */
-    .day-box.holiday-today {
-      background-color: #a3d5a2 !important;
-      color: #333 !important;
-      border: 3px solid #ffb600;
-    }
-    /* Dias passados em cinza */
-    .day-box.past {
-      background-color: #cecece !important;
-      color: #777 !important;
-    }
-    /* Finais de semana futuros em cinza */
-    .day-box.weekend {
-      background-color: #cecece !important;
-      color: #777 !important;
-    }
-    .day-name {
-      margin-bottom: 2px;
-    }
-    .month-year {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      font-weight: 400;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-
-  <div class=&quot;outer-wrapper&quot;>
-    <div class=&quot;calendar-container&quot;>
-      <div class=&quot;day-box&quot; data-day=&quot;0&quot;><div class=&quot;day-name&quot;>Dom</div><div class=&quot;day-number&quot;></div></div>
-      <div class=&quot;day-box&quot; data-day=&quot;1&quot;><div class=&quot;day-name&quot;>Seg</div><div class=&quot;day-number&quot;></div></div>
-      <div class=&quot;day-box&quot; data-day=&quot;2&quot;><div class=&quot;day-name&quot;>Ter</div><div class=&quot;day-number&quot;></div></div>
-      <div class=&quot;day-box&quot; data-day=&quot;3&quot;><div class=&quot;day-name&quot;>Qua</div><div class=&quot;day-number&quot;></div></div>
-      <div class=&quot;day-box&quot; data-day=&quot;4&quot;><div class=&quot;day-name&quot;>Qui</div><div class=&quot;day-number&quot;></div></div>
-      <div class=&quot;day-box&quot; data-day=&quot;5&quot;><div class=&quot;day-name&quot;>Sex</div><div class=&quot;day-number&quot;></div></div>
-      <div class=&quot;day-box&quot; data-day=&quot;6&quot;><div class=&quot;day-name&quot;>Sáb</div><div class=&quot;day-number&quot;></div></div>
-    </div>
-    <div class=&quot;month-year&quot;></div>
-  </div>
-
-  <script>
-    // Data/horário em Brasília
-    const brasiliaTime = new Date(
-      new Date().toLocaleString(&quot;en-US&quot;, { timeZone: &quot;America/Sao_Paulo&quot; })
-    );
-    const dayOfWeek = brasiliaTime.getDay();
-    const dayOfMonth = brasiliaTime.getDate();
-    const month = brasiliaTime.getMonth();
-    const year = brasiliaTime.getFullYear();
-    const meses = [&quot;Janeiro&quot;,&quot;Fevereiro&quot;,&quot;Março&quot;,&quot;Abril&quot;,&quot;Maio&quot;,&quot;Junho&quot;,
-                   &quot;Julho&quot;,&quot;Agosto&quot;,&quot;Setembro&quot;,&quot;Outubro&quot;,&quot;Novembro&quot;,&quot;Dezembro&quot;];
-    const dayBoxes = document.querySelectorAll('.day-box');
-    const monthYearEl = document.querySelector('.month-year');
-    monthYearEl.textContent = `${meses[month]} de ${year}`;
-
-    // Feriados (mês-dia)
-    const holidays = {
-      &quot;1-1&quot;: &quot;Feliz Ano Novo!&quot;,
-      &quot;3-15&quot;: &quot;Feliz Dia do Consumidor!&quot;,
-      &quot;4-18&quot;: &quot;Feliz Sexta-feira Santa à todos!&quot;,
-      &quot;4-20&quot;: &quot;Feliz Páscoa à todos!&quot;,
-      &quot;4-21&quot;: &quot;Dia de Tiradentes&quot;,
-      &quot;4-23&quot;: &quot;Feliz dia de São Jorge&quot;,
-      &quot;5-1&quot;: &quot;Feliz dia do Trabalhador&quot;,
-      &quot;5-11&quot;: &quot;Feliz dia das Mães!&quot;,
-      &quot;6-12&quot;: &quot;Dia dos Namorados!&quot;,
-      &quot;6-19&quot;: &quot;Dia de Corpus Christi&quot;,
-      &quot;8-10&quot;: &quot;Feliz dia dos Pais!&quot;,
-      &quot;9-7&quot;: &quot;Dia da Independência do Brasil&quot;,
-      &quot;9-15&quot;: &quot;Feliz dia do Cliente!&quot;,
-      &quot;10-12&quot;: &quot;Feliz dia das Crianças!&quot;,
-      &quot;11-2&quot;: &quot;Dia de Finados&quot;,
-      &quot;11-15&quot;: &quot;Proclamação da República&quot;,
-      &quot;11-20&quot;: &quot;Dia de Zumbi e da Consciência Negra&quot;,
-      &quot;12-25&quot;: &quot;Feliz Natal à todos!&quot;,
-      &quot;12-31&quot;: &quot;Feliz Ano Novo!&quot;
-    };
-
-    dayBoxes.forEach(box => {
-      const boxDay = parseInt(box.dataset.day, 10);
-      const offset = boxDay - dayOfWeek;
-      const dateBlock = new Date(year, month, dayOfMonth + offset);
-      const blockKey = `${dateBlock.getMonth()+1}-${dateBlock.getDate()}`;
-
-      // Número do dia
-      box.querySelector('.day-number').textContent = dateBlock.getDate();
-
-      // 1) Feriados (exceto hoje) → verde
-      if (holidays[blockKey] &amp;&amp; offset !== 0) {
-        box.classList.add('holiday');
-        return;
-      }
-
-      // 2) Hoje
-      if (offset === 0) {
-        if (holidays[blockKey]) {
-          // Hoje é feriado → verde + contorno laranja (#ffb600)
-          monthYearEl.textContent = holidays[blockKey];
-          box.classList.add('holiday-today');
-        } else {
-          // Hoje é dia útil → laranja
-          box.classList.add('highlight');
-        }
-        return;
-      }
-
-      // 3) Dias passados (offset < 0) → cinza
-      if (offset < 0) {
-        box.classList.add('past');
-        return;
-      }
-
-      // 4) Finais de semana futuros → cinza
-      if (boxDay === 0 || boxDay === 6) {
-        box.classList.add('weekend');
-      }
-    });
-
-    // Mensagens opcionais
-    if (dayOfWeek === 5) monthYearEl.textContent = &quot;#Sextooooou 🥳&quot;;
-    if (dayOfWeek === 1) monthYearEl.textContent = &quot;Uma ótima segunda à todos! 🙏&quot;;
-  </script>
-
 </body>
 </html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="36ab5204784de513_0" name="36ab5204784de513_0" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=430828782"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div></div></div></section><section id="h.1c62bf607f13067a_12" class="yaqOZd"><div class="IFuOkc"></div><div class="mYVXT"><div class="LS81yb VICjCf j5pSsc db35Fc" tabindex="-1"><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.34c89c0969fc3ffb_0" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html>
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone Jornal Responsivo - Cores Dinâmicas</title>
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden;  /* Evita barras de rolagem */
-    }
-    /* Link sem decoração */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-    /* Container do ícone com tamanho fluido */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2; /* Cor padrão - será substituída via script */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    /* SVG ocupa 50% do container */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-    /* Estilo do texto do jornal */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      color: #FFFFFF; /* Cor padrão - será substituída via script */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-transform: lowercase;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link envolvendo o componente -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/jornal&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Ícone SVG (a cor padrão também será alterada via script) -->
-      <svg viewBox=&quot;0 0 512 512&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; fill=&quot;#FFFFFF&quot;>
-        <path d=&quot;M497,64.141c-130.548,0-216.272,36.223-241,48.174v0.291c-25.122-11.214-117.854-48.465-241-48.465
-          c-8.284,0-15,6.716-15,15v358.482c0,8.284,6.716,15,15,15c134.198,0,232.915,47.742,234.348,48.444
-          c2.102,1.04,4.379,1.556,6.651,1.556c0,0,0,0,0,0H256c0.329,0,0.658-0.012,0.987-0.034c0.106-0.007,0.212-0.021,0.318-0.03
-          c0.223-0.019,0.446-0.04,0.668-0.069c0.125-0.017,0.25-0.039,0.375-0.059c0.201-0.032,0.402-0.065,0.602-0.105
-          c0.134-0.027,0.267-0.059,0.4-0.089c0.19-0.043,0.379-0.088,0.567-0.139c0.137-0.037,0.273-0.078,0.409-0.119
-          c0.183-0.055,0.364-0.113,0.545-0.175c0.137-0.047,0.274-0.097,0.41-0.148c0.177-0.066,0.352-0.137,0.527-0.21
-          c0.137-0.057,0.273-0.116,0.409-0.178c0.172-0.078,0.341-0.161,0.511-0.247c0.133-0.067,0.266-0.133,0.398-0.204
-          c0.05-0.027,0.101-0.05,0.151-0.078c0.867-0.481,88.404-48.116,233.723-48.116c8.284,0,15-6.716,15-15V79.141
-          C512,70.856,505.284,64.141,497,64.141z M59.503,141.832c0-4.214,1.772-8.234,4.884-11.076c3.111-2.842,7.269-4.243,11.472-3.863
-          c43.558,3.954,85.307,12.069,124.085,24.121c6.273,1.95,10.548,7.755,10.548,14.324v60c0,4.768-2.267,9.251-6.105,12.079
-          c-2.608,1.921-5.733,2.921-8.895,2.921c-1.492,0-2.992-0.222-4.451-0.676c-36.768-11.427-76.433-19.129-117.894-22.893
-          c-7.727-0.701-13.644-7.18-13.644-14.938V141.832z M209.817,409.79c-1.998,6.429-7.924,10.552-14.32,10.552
-          c-1.475,0-2.974-0.219-4.456-0.68c-36.768-11.427-76.433-19.129-117.894-22.893c-8.25-0.749-14.332-8.044-13.583-16.294
-          c0.749-8.251,8.05-14.335,16.294-13.583c43.558,3.954,85.307,12.069,124.085,24.121
-          C207.856,393.473,212.276,401.879,209.817,409.79z M209.817,349.79c-1.998,6.429-7.924,10.552-14.32,10.552
-          c-1.475,0-2.974-0.219-4.456-0.68c-36.768-11.427-76.433-19.129-117.894-22.893c-8.25-0.749-14.332-8.044-13.583-16.294
-          c0.749-8.251,8.05-14.333,16.294-13.583c43.558,3.954,85.307,12.069,124.085,24.121
-          C207.856,333.473,212.276,341.879,209.817,349.79z M209.817,289.79c-1.998,6.429-7.924,10.552-14.32,10.552
-          c-1.475,0-2.974-0.219-4.456-0.68c-36.768-11.427-76.433-19.129-117.894-22.893c-8.25-0.749-14.332-8.044-13.583-16.294
-          c0.749-8.251,8.05-14.339,16.294-13.583c43.558,3.954,85.307,12.069,124.085,24.121
-          C207.856,273.473,212.276,281.879,209.817,289.79z M438.353,396.771c-41.46,3.764-81.125,11.466-117.894,22.893
-          c-1.482,0.46-2.982,0.68-4.457,0.68c-6.396,0-12.321-4.123-14.319-10.552c-2.458-7.911,1.961-16.317,9.873-18.776
-          c38.78-12.052,80.528-20.167,124.085-24.121c8.244-0.749,15.546,5.332,16.294,13.583
-          C452.685,388.726,446.604,396.022,438.353,396.771z M438.353,336.771c-41.46,3.764-81.125,11.466-117.894,22.893
-          c-1.482,0.46-2.982,0.68-4.457,0.68c-6.396,0-12.321-4.123-14.319-10.552c-2.458-7.911,1.961-16.317,9.873-18.776
-          c38.78-12.052,80.528-20.167,124.085-24.121c8.244-0.753,15.546,5.332,16.294,13.583
-          C452.685,328.726,446.604,336.022,438.353,336.771z M438.353,276.771c-41.46,3.764-81.125,11.466-117.894,22.893
-          c-1.482,0.46-2.982,0.68-4.457,0.68c-6.396,0-12.321-4.123-14.319-10.552c-2.458-7.911,1.961-16.317,9.873-18.776
-          c38.78-12.052,80.528-20.167,124.085-24.121c8.244-0.749,15.546,5.332,16.294,13.583
-          C452.685,268.726,446.604,276.022,438.353,276.771z M438.353,216.77c-41.46,3.764-81.125,11.466-117.894,22.893
-          c-1.482,0.46-2.982,0.68-4.457,0.68c-6.396,0-12.321-4.123-14.319-10.552c-2.458-7.911,1.961-16.317,9.873-18.776
-          c38.78-12.052,80.528-20.167,124.085-24.121c8.244-0.754,15.546,5.331,16.294,13.583
-          C452.685,208.726,446.604,216.021,438.353,216.77z M438.353,156.77c-41.46,3.764-81.125,11.466-117.894,22.893
-          c-1.482,0.46-2.982,0.68-4.457,0.68c-6.396,0-12.321-4.123-14.319-10.552c-2.458-7.911,1.961-16.317,9.873-18.776
-          c38.78-12.052,80.528-20.167,124.085-24.121c8.244-0.75,15.546,5.332,16.294,13.583
-          C452.685,148.726,446.604,156.021,438.353,156.77z&quot;/>
-      </svg>
-      <!-- Texto do jornal -->
-      <div class=&quot;nome-jornal&quot;>Jornal</div>
-    </div>
-  </a>
-
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ..., 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0-11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos que serão alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo: se for julho, usamos background com degradê
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-    // Aplica a cor (atributo fill) do SVG
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="34c89c0969fc3ffb_0" name="34c89c0969fc3ffb_0" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=310505807"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.34c89c0969fc3ffb_13" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html>
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone Cardápio Responsivo - Cores Dinâmicas</title>
-  <!-- Adicionando a fonte &quot;Poppins&quot; do Google Fonts -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <!-- Meta tag para garantirmos responsividade em todos os dispositivos -->
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: -ms-flexbox;       /* Suporte para IE10/11 */
-      display: flex;
-      -ms-flex-align: center;
-      align-items: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden;  /* Evita barras de rolagem */
-    }
-    
-    /* O link envolve todo o componente, removendo a decoração padrão */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-    
-    /* Container do ícone com tamanho fluido usando clamp:
-       - O tamanho ficará entre 85px (mínimo) e 120px (máximo),
-       - Escalando com 40vw no meio.
-    */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2; /* Cor padrão (será substituída via script) */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* O SVG ocupa 50% do container para manter a proporção */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-    
-    /* O texto escala de forma fluida também, entre 15px e 16px */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      color: #FFFFFF; /* Cor padrão (será substituída via script) */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-align: center;
-    }
-    
-    /* Define a animação para o contorno interno que pisca suavemente */
-    @keyframes blink {
-      0%, 100% {
-        box-shadow: inset 0 0 0 3px rgba(255, 180, 0, 1);
-      }
-      50% {
-        box-shadow: inset 0 0 0 3px rgba(255, 180, 0, 0);
-      }
-    }
-    
-    /* Aplica a animação quando for segunda-feira */
-    .icone-jornal.segunda-blink {
-      animation: blink 3s infinite ease-in-out;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link que envolve o componente e redireciona para a URL desejada -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/card%C3%A1pio&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Ícone em SVG (a cor será modificada via script) -->
-      <svg id=&quot;Capa_1&quot; enable-background=&quot;new 0 0 513.029 513.029&quot; height=&quot;512&quot; viewBox=&quot;0 0 513.029 513.029&quot; width=&quot;512&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; fill=&quot;#FFFFFF&quot;>
-        <path d=&quot;m148.684 65.029h220.331v-45.014c0-11.404-9.338-20.015-19.969-20.015-2.07 0-4.187.326-6.296 1.022z&quot;/>
-        <path d=&quot;m409.015 95.029h-305c-11.046 0-20 8.954-20 20v265.329 112.671c0 11.046 8.954 20 20 20h305c11.046 0 20-8.954 20-20v-378c0-11.045-8.955-20-20-20zm-252.5 180.324h4.345c6.466-41.398 39.257-74.189 80.655-80.655v-7.516c0-8.284 6.716-15 15-15s15 6.716 15 15v-7.516c41.398 6.466 74.189 39.257 80.655 80.655h4.345c8.284 0 15 6.716 15 15s-6.716 15-15 15h-200c-8.284 0-15-6.716-15-15s6.715-15 15-15zm92.817 85.524c0 8.284-6.716 15-15 15h-72c-8.284 0-15-6.716-15-15s6.716-15 15-15h72c8.284 0 15 6.716 15 15zm103.433 75h-192.5c-8.284 0-15-6.716-15-15s6.716-15 15-15h192.5c8.284 0 15 6.716 15 15s-6.716 15-15 15z&quot;/>
-        <path d=&quot;m321.636 275.353c-6.827-29.645-33.434-51.818-65.121-51.818s-58.294 22.174-65.121 51.818z&quot;/>
-      </svg>
-      <!-- Texto &quot;Cardápio&quot; centralizado dentro do ícone -->
-      <div class=&quot;nome-jornal&quot;>Cardápio</div>
-    </div>
-  </a>
-  
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ... 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0 a 11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos que serão alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo - se for julho, utiliza degradê
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-    // Aplica a cor do ícone (atributo fill do SVG)
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-    
-    // Verifica se é segunda-feira (getDay() retorna 1 para segunda-feira)
-    if (dataAtual.getDay() === 1) {
-      // Adiciona a classe que aplica o contorno interno animado
-      iconeJornal.classList.add(&quot;segunda-blink&quot;);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="34c89c0969fc3ffb_13" name="34c89c0969fc3ffb_13" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=497354670"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.34c89c0969fc3ffb_5" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html>  
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone Aniversário Responsivo - Cores Dinâmicas</title>
-  <!-- Importação da fonte &quot;Poppins&quot; -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <!-- Meta tag para garantirmos responsividade em todos os dispositivos -->
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: -ms-flexbox;       /* Suporte para IE10/11 */
-      display: flex;
-      -ms-flex-align: center;
-      align-items: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden;  /* Evita barras de rolagem */
-    }
-
-    /* O link envolve todo o componente, removendo a decoração padrão */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-
-    /* Container do ícone com tamanho fluido usando clamp:
-       - O tamanho ficará entre 85px (mínimo) e 120px (máximo),
-       - Escalando com 40vw no meio.
-    */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2; /* Cor padrão que será substituída via script */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* O SVG ocupa 50% do container para manter a proporção */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-
-    /* O texto escala de forma fluida também, entre 13px e 16px */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      color: #FFFFFF; /* Cor padrão que será substituída via script */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link que envolve o componente e redireciona para a URL desejada -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/aniversariante&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Ícone em SVG com a arte em branco (a cor será modificada via script) -->
-      <svg viewBox=&quot;0 0 512 512&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; fill=&quot;#FFFFFF&quot;>
-        <g>
-          <g>
-            <g>
-              <path d=&quot;M26.788,265.219l42.414,17.674c5.755,2.396,11.837,3.604,17.92,3.604c6.001,0,12.042-1.188,17.756-3.543l29-11.94
-                c6.492-2.662,13.64-2.642,20.111,0.082l27.648,11.633c11.633,4.915,24.433,4.936,36.065,0.082l28.242-11.756
-                c6.472-2.703,13.64-2.703,20.111,0l28.242,11.756c11.612,4.854,24.412,4.833,36.065-0.082l27.628-11.633
-                c6.492-2.744,13.64-2.744,20.132-0.082l29,11.94c11.51,4.751,24.187,4.731,35.697-0.082l42.394-17.654
-                c3.83-1.597,6.308-5.325,6.308-9.441v-61.44c0-16.957-13.783-30.72-30.72-30.72h-92.16v-22.385
-                c11.899-4.239,20.48-15.503,20.48-28.815c0-24.044-21.074-45.814-23.491-48.21c-3.994-3.994-10.465-3.994-14.479,0
-                c-2.396,2.396-23.47,24.166-23.47,48.21c0,13.312,8.581,24.576,20.48,28.815v22.385h-81.92v-42.865
-                c11.899-4.239,20.48-15.503,20.48-28.815c0-22.262-19.354-61.624-21.565-66.027c-3.482-6.943-14.828-6.943-18.309,0
-                c-2.212,4.403-21.565,43.766-21.565,66.027c0,13.312,8.581,24.576,20.48,28.815v42.865h-81.92v-22.385
-                c11.899-4.239,20.48-15.503,20.48-28.815c0-24.044-21.074-45.814-23.491-48.21c-3.994-3.994-10.465-3.994-14.479,0
-                c-2.396,2.396-23.47,24.166-23.47,48.21c0,13.312,8.581,24.576,20.48,28.815v22.385H51.2c-16.937,0-30.72,13.763-30.72,30.72
-                v61.44C20.48,259.894,22.958,263.621,26.788,265.219z&quot;/>
-              <path d=&quot;M481.28,409.377H30.72C13.783,409.377,0,423.14,0,440.097c0,28.221,22.958,51.2,51.2,51.2h409.6
-                c28.242,0,51.2-22.979,51.2-51.2C512,423.14,498.217,409.377,481.28,409.377z&quot;/>
-              <path d=&quot;M399.319,301.878l-29-11.94c-0.696-0.287-1.434-0.43-2.15-0.43c-0.778,0-1.495,0.143-2.232,0.451l-27.628,11.653
-                c-8.356,3.523-17.101,5.304-26.071,5.304c-8.888,0-17.551-1.761-25.846-5.202l-28.201-11.756
-                c-0.717-0.307-1.475-0.451-2.191-0.451c-0.717,0-1.475,0.143-2.171,0.43l-28.262,11.776c-8.253,3.441-16.937,5.202-25.805,5.202
-                c-8.97,0-17.715-1.782-26.091-5.304l-27.607-11.653c-0.696-0.287-1.475-0.451-2.232-0.451c-0.737,0-1.475,0.164-2.191,0.451
-                l-28.959,11.919c-8.192,3.379-16.794,5.099-25.559,5.099c-8.868,0-17.531-1.741-25.784-5.181l-20.378-8.479v95.58h430.08v-95.58
-                l-20.357,8.479c-8.253,3.441-16.916,5.181-25.805,5.181C416.113,306.977,407.491,305.257,399.319,301.878z&quot;/>
-            </g>
-          </g>
-        </g>
-      </svg>
-      <!-- Texto &quot;Aniversário&quot; centralizado -->
-      <div class=&quot;nome-jornal&quot;>Aniversário</div>
-    </div>
-  </a>
-
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ..., 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0 a 11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos que serão alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo: se for julho, utiliza o degradê; para os demais, utiliza a cor simples
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-
-    // Aplica a cor do ícone (atributo fill do SVG)
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="34c89c0969fc3ffb_5" name="34c89c0969fc3ffb_5" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=238539940"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.34c89c0969fc3ffb_9" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html> 
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone Férias Responsivo - Cores Dinâmicas</title>
-  <!-- Importação da fonte &quot;Poppins&quot; -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <!-- Meta tag para garantirmos responsividade em todos os dispositivos -->
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: -ms-flexbox;       /* Suporte para IE10/11 */
-      display: flex;
-      -ms-flex-align: center;
-      align-items: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden;  /* Evita barras de rolagem */
-    }
-
-    /* O link envolve todo o componente, removendo a decoração padrão */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-
-    /* Container do ícone com tamanho fluido usando clamp:
-       - O tamanho ficará entre 85px (mínimo) e 120px (máximo),
-       - Escalando com 40vw no meio.
-    */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2; /* Cor padrão, será substituída via script */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* O SVG ocupa 50% do container para manter a proporção */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-
-    /* O texto escala de forma fluida também, entre 15px e 16px */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      color: #FFFFFF; /* Cor padrão, será substituída via script */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link que envolve o componente e redireciona para a URL desejada -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/f%C3%A9rias&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Novo ícone em SVG com a arte em branco (a cor será modificada via script) -->
-      <svg viewBox=&quot;0 0 512.002 512.002&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; fill=&quot;#FFFFFF&quot;>
-        <g>
-          <g>
-            <path d=&quot;M182.874,271.227l37.106-19.528l-37.106-19.529l22.37-35.466l-41.899,1.64l1.64-41.899l-35.466,22.37l-19.529-37.106
-              l-19.529,37.106l-35.466-22.37l1.64,41.899l-41.899-1.64l22.37,35.466L0,251.699l37.106,19.529l-22.37,35.466l41.899-1.64
-              l-1.64,41.898l35.466-22.37l19.529,37.107l19.529-37.106l35.466,22.369l-1.64-41.899l41.899,1.64L182.874,271.227z
-               M109.99,306.694c-30.373,0-54.995-24.623-54.995-54.995c0-30.372,24.622-54.995,54.995-54.995
-              c30.373,0,54.995,24.623,54.995,54.995C164.985,282.071,140.363,306.694,109.99,306.694z&quot;/>
-          </g>
-        </g>
-        <g>
-          <g>
-            <path d=&quot;M460.661,469.408c-10.13,7.123-17.449,12.27-34.037,12.27s-23.908-5.147-34.039-12.27
-              c-11.233-7.898-25.214-17.727-51.29-17.727c-26.077,0-40.057,9.83-51.29,17.727c-10.13,7.123-17.449,12.27-34.035,12.27
-              c-16.586,0-23.905-5.146-34.035-12.27c-11.233-7.897-25.213-17.727-51.288-17.727c-26.077,0-40.056,9.83-51.289,17.727
-              c-10.13,7.123-17.449,12.27-34.035,12.27c-16.586,0-23.904-5.146-34.034-12.27C40.056,461.51,26.077,451.68,0,451.68v29.997
-              c16.585,0,23.905,5.146,34.035,12.27c11.233,7.897,25.213,17.727,51.288,17.727c26.077,0,40.056-9.83,51.289-17.727
-              c10.13-7.123,17.449-12.27,34.035-12.27s23.904,5.146,34.034,12.27c11.233,7.897,25.213,17.727,51.288,17.727
-              s40.056-9.829,51.289-17.727c10.13-7.123,17.449-12.27,34.036-12.27c16.587,0,23.907,5.146,34.038,12.27
-              c11.233,7.898,25.214,17.727,51.291,17.727c26.077,0,40.057-9.829,51.29-17.727c10.132-7.122,17.451-12.27,34.039-12.27V451.68
-              C485.875,451.68,471.895,461.509,460.661,469.408z&quot;/>
-          </g>
-        </g>
-        <g>
-          <g>
-            <path d=&quot;M496.456,109.559c-16.495-35.373-44.321-63.173-79.237-79.541l7.072-19.429L396.101,0.327l-7.075,19.439
-              C307.521-1.806,221.278,42.121,191.893,122.856l-6.055,16.637l17.406,3.238c28.129,5.233,55.021,15.021,79.93,29.093l3.502,1.978
-              l4.021-0.039c0.506-0.005,1.012-0.007,1.517-0.007c13.24,0,26.323,1.693,38.96,4.957L261.28,370.743
-              c-1.768-0.022-3.534-0.054-5.304-0.054c-46.345,0-91.86,7.589-135.281,22.556c-27.355,9.429-53.538,21.68-78.266,36.555
-              c11.425,4.753,19.843,10.664,26.11,15.07c8.771,6.168,9.688,6.812,16.783,6.812c7.096,0,8.012-0.645,16.78-6.81
-              c12.338-8.675,32.98-23.187,68.544-23.187c35.564,0,56.206,14.514,68.539,23.185c8.771,6.168,9.688,6.812,16.783,6.812
-              c7.096,0,8.012-0.645,16.779-6.81c12.339-8.674,32.981-23.187,68.546-23.187c35.569,0,56.211,14.515,68.545,23.186
-              c8.77,6.166,9.687,6.811,16.784,6.811c7.097,0,8.014-0.645,16.781-6.81c6.269-4.408,14.69-10.32,26.117-15.074
-              c-24.728-14.875-50.91-27.126-78.266-36.555c-31.909-10.999-64.951-17.996-98.62-20.942l66.728-183.331
-              c12.229,5.838,23.736,13.286,34.189,22.231l3.056,2.615l3.954,0.735c28.129,5.233,55.021,15.021,79.931,29.093l15.416,8.708
-              l6.056-16.638C517.036,194.302,515.081,149.499,496.456,109.559z&quot;/>
-          </g>
-        </g>
-      </svg>
-      <!-- Texto &quot;Férias&quot; centralizado dentro do ícone -->
-      <div class=&quot;nome-jornal&quot;>Férias</div>
-    </div>
-  </a>
-
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ..., 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0 a 11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos que serão alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo: se for julho, utiliza o degradê; caso contrário, usa a cor sólida
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-
-    // Aplica a cor do ícone (atributo fill do SVG)
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="34c89c0969fc3ffb_9" name="34c89c0969fc3ffb_9" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=335639726"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div></div></div></section><section id="h.524287e33b8a9d5c_0" class="yaqOZd"><div class="IFuOkc"></div><div class="mYVXT"><div class="LS81yb VICjCf j5pSsc db35Fc" tabindex="-1"><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.34c89c0969fc3ffb_17" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html> 
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone Cipa Responsivo - Cores Dinâmicas</title>
-  <!-- Importação da fonte &quot;Poppins&quot; -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <!-- Meta tag para garantirmos responsividade em todos os dispositivos -->
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: -ms-flexbox;       /* Suporte para IE10/11 */
-      display: flex;
-      -ms-flex-align: center;
-      align-items: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden;  /* Evita barras de rolagem */
-    }
-    
-    /* O link envolve todo o componente, removendo a decoração padrão */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-    
-    /* Container do ícone com tamanho fluido usando clamp:
-       - O tamanho ficará entre 85px (mínimo) e 120px (máximo),
-       - Escalando com 40vw no meio.
-    */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2;  /* Cor padrão que será substituída via script */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* O SVG ocupa 50% do container para manter a proporção */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-    
-    /* O texto escala de forma fluida também, entre 15px e 16px
-       e a inicial de cada palavra ficará em maiúscula.
-    */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      text-transform: capitalize;
-      color: #FFFFFF;  /* Cor padrão que será substituída via script */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link que envolve o componente e redireciona para a URL desejada -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/cipa&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Novo ícone em SVG com a arte em branco (fill=&quot;#FFFFFF&quot;) -->
-      <svg id=&quot;Layer_1&quot; enable-background=&quot;new 0 0 512 512&quot; viewBox=&quot;0 0 512 512&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; fill=&quot;#FFFFFF&quot;>
-        <path d=&quot;m503 305.427v9.59c0 14.772-12.086 26.859-26.859 26.859h-90.99v-63.308h90.99c14.773 0 26.859 12.086 26.859 26.859zm-494 0v9.59c0 14.772 12.086 26.859 26.859 26.859h90.989v-63.308h-90.989c-14.773 0-26.859 12.086-26.859 26.859zm369.176-225.171-9.627 144.188c-.293 4.401-4.099 7.731-8.5 7.438s-7.73-4.099-7.438-8.5l10.184-152.533c-16.072-8.963-33.361-15.976-51.544-20.714v178.158c20.71 6.714 42.38 17.089 66.064 31.14l5.284 3.135 94.007.006c-.383-75.783-39.485-142.846-98.43-182.318zm-82.925 143.533v-191.144c0-12.693-10.386-23.08-23.08-23.08h-32.342c-12.694 0-23.081 10.386-23.081 23.08v191.144c26.561-6.292 51.943-6.292 78.503 0zm-116.247 147.065v-76.577c28.895-15.327 53.059-22.991 76.996-23.007 23.899-.016 48.066 7.659 76.996 23.007v76.577c0 21.261-8.472 37.842-25.742 50.255l-51.254 36.838-51.256-36.839c-17.271-12.412-25.74-28.995-25.74-50.254zm20.739-14.813 26.729 33.637c4.572 6.548 13.983 7.443 19.679 1.747l62.014-62.014c5.029-5.03 5.029-13.185 0-18.215-5.03-5.03-13.186-5.03-18.215 0l-51.822 51.822-18.258-22.978c-4.418-5.558-12.506-6.481-18.064-2.063s-6.481 12.506-2.063 18.064zm169.408-82.848v97.66c0 32.86-14.126 60.408-40.809 79.586l-72.342 51.997-72.345-51.996c-26.682-19.177-40.807-46.727-40.807-79.586v-97.661c85.65-50.816 140.653-50.815 226.303 0zm-113.151-17.892c-27.927-.016-55.605 9.067-88.809 27.232-2.653 1.445-4.157 4.178-4.16 7l-.028 81.321c0 26.311 11.067 47.84 32.427 63.191l55.913 40.186c2.905 2.091 6.741 1.945 9.455-.103l55.768-40.082c21.36-15.352 32.43-36.88 32.43-63.192v-81.32c0-3.281-1.976-6.101-4.802-7.335-32.893-17.92-60.401-26.882-88.194-26.898zm-55.251-205.167c-18.183 4.738-35.473 11.751-51.544 20.714l10.184 152.534c.293 4.401-3.037 8.207-7.438 8.5s-8.207-3.037-8.5-7.438l-9.626-144.188c-58.944 39.473-98.047 106.533-98.43 182.318l94.006-.006 5.284-3.135c23.684-14.052 45.354-24.428 66.064-31.141z&quot;/>
-      </svg>
-      <!-- Texto &quot;Cipa&quot; centralizado dentro do ícone -->
-      <div class=&quot;nome-jornal&quot;>Cipa</div>
-    </div>
-  </a>
-  
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ..., 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0 a 11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos a serem alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo: se for julho (mês 6), utiliza o degradê; para os demais, usa a cor sólida
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-    
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-    
-    // Aplica a cor do ícone (atributo fill do SVG)
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="34c89c0969fc3ffb_17" name="34c89c0969fc3ffb_17" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=251608748"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.70618bcc1e25db12_4" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html> 
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone FlappyBob Responsivo - Cores Dinâmicas</title>
-  <!-- Importação da fonte &quot;Poppins&quot; -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <!-- Meta tag para garantirmos responsividade em todos os dispositivos -->
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: -ms-flexbox;       /* Suporte para IE10/11 */
-      display: flex;
-      -ms-flex-align: center;
-      align-items: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden;  /* Evita barras de rolagem */
-    }
-    
-    /* O link envolve todo o componente, removendo a decoração padrão */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-    
-    /* Container do ícone com tamanho fluido usando clamp:
-       - O tamanho ficará entre 85px (mínimo) e 120px (máximo),
-       - Escalando com 40vw no meio.
-    */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2; /* Cor padrão que será substituída via script */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* O SVG ocupa 50% do container para manter a proporção */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-    
-    /* O texto escala de forma fluida também, entre 13px e 16px.
-       A propriedade &quot;text-transform: capitalize&quot; garante que
-       a inicial de cada palavra seja exibida em maiúscula.
-    */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      text-transform: capitalize;
-      color: #FFFFFF; /* Cor padrão que será substituída via script */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link que envolve o componente e redireciona para a URL desejada -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/game&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Novo ícone em SVG com a arte em branco (fill=&quot;#FFFFFF&quot;) -->
-      <svg id=&quot;Layer_1&quot; viewBox=&quot;0 0 512 512&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; data-name=&quot;Layer 1&quot; fill=&quot;#FFFFFF&quot;>
-        <path d=&quot;m185.939 117.857v-9.679c0-32.351-100.57-32.351-100.57 0v7.958c36.061-20.302 64.515-17.35 100.57 1.721zm240.691-1.721v-7.958c0-32.351-100.57-32.351-100.57 0v9.679c36.056-19.07 64.51-22.023 100.57-1.721zm-240.295 15.615c40.236 22.743 99.094 22.743 139.33 0 36.092-20.399 62.611-25.992 102.208-.888 45.167 28.636 80.415 141.396 73.182 217.55-8.548 90.015-87.151 102.868-142.506 43.046-28.573-30.879-59.901-47.571-102.549-48.012-42.648.442-73.976 17.133-102.549 48.012-55.355 59.822-133.958 46.969-142.506-43.046-7.233-76.155 28.015-188.915 73.182-217.55 39.597-25.104 66.116-19.511 102.208.888zm-32.956 102.873v-36.382h-36.383v36.382h-36.383v36.383h36.383v36.383h36.383v-36.383h36.382v-36.383zm217.729-23.189c-10.241 0-18.544 8.303-18.544 18.544s8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544-8.303-18.544-18.544-18.544zm-23.189 60.277c0-10.242-8.303-18.544-18.544-18.544s-18.544 8.303-18.544 18.544 8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544zm23.189 23.189c-10.241 0-18.544 8.303-18.544 18.544s8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544-8.303-18.544-18.544-18.544zm60.277-23.189c0-10.242-8.303-18.544-18.544-18.544s-18.544 8.303-18.544 18.544 8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544z&quot; fill-rule=&quot;evenodd&quot;/>
-      </svg>
-      <!-- Texto &quot;FlappyBob&quot; centralizado dentro do ícone -->
-      <div class=&quot;nome-jornal&quot;>FlappyBob</div>
-    </div>
-  </a>
-  
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ..., 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0 a 11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos que serão alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo: se for julho (índice 6), utiliza o degradê; para os demais, usa a cor sólida
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-    
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-    
-    // Aplica a cor do ícone (atributo fill do SVG)
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="70618bcc1e25db12_4" name="70618bcc1e25db12_4" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=931839463"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.73d6acc5196da805_0" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html> 
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone VanRace Responsivo - Cores Dinâmicas</title>
-  <!-- Importação da fonte &quot;Poppins&quot; -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <!-- Meta tag para garantirmos responsividade em todos os dispositivos -->
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: -ms-flexbox; /* Suporte para IE10/11 */
-      display: flex;
-      -ms-flex-align: center;
-      align-items: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden; /* Evita barras de rolagem */
-    }
-    
-    /* O link envolve todo o componente, removendo a decoração padrão */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-    
-    /* Container do ícone com tamanho fluido usando clamp:
-       - O tamanho ficará entre 85px (mínimo) e 120px (máximo),
-       - Escalando com 40vw no meio.
-    */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2; /* Cor padrão que será substituída via script */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* O SVG ocupa 50% do container para manter a proporção */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-    
-    /* O texto escala de forma fluida também, entre 15px e 16px
-       e exibe a inicial de cada palavra em maiúscula.
-    */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      text-transform: capitalize;
-      color: #FFFFFF; /* Cor padrão que será substituída via script */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link que envolve o componente e redireciona para a URL desejada -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/game-car?authuser=0&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Ícone em SVG com a arte em branco (fill=&quot;#FFFFFF&quot;) -->
-      <svg id=&quot;Layer_1&quot; viewBox=&quot;0 0 512 512&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; data-name=&quot;Layer 1&quot; fill=&quot;#FFFFFF&quot;>
-        <path d=&quot;m185.939 117.857v-9.679c0-32.351-100.57-32.351-100.57 0v7.958c36.061-20.302 64.515-17.35 100.57 1.721zm240.691-1.721v-7.958c0-32.351-100.57-32.351-100.57 0v9.679c36.056-19.07 64.51-22.023 100.57-1.721zm-240.295 15.615c40.236 22.743 99.094 22.743 139.33 0 36.092-20.399 62.611-25.992 102.208-.888 45.167 28.636 80.415 141.396 73.182 217.55-8.548 90.015-87.151 102.868-142.506 43.046-28.573-30.879-59.901-47.571-102.549-48.012-42.648.442-73.976 17.133-102.549 48.012-55.355 59.822-133.958 46.969-142.506-43.046-7.233-76.155 28.015-188.915 73.182-217.55 39.597-25.104 66.116-19.511 102.208.888zm-32.956 102.873v-36.382h-36.383v36.382h-36.383v36.383h36.383v36.383h36.383v-36.383h36.382v-36.383zm217.729-42.086c-10.241 0-18.544 8.303-18.544 18.544s8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544-8.303-18.544-18.544-18.544zm-23.189 60.277c0-10.242-8.303-18.544-18.544-18.544s-18.544 8.303-18.544 18.544 8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544zm23.189 23.189c-10.241 0-18.544 8.303-18.544 18.544s8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544-8.303-18.544-18.544-18.544zm60.277-23.189c0-10.242-8.303-18.544-18.544-18.544s-18.544 8.303-18.544 18.544 8.303 18.544 18.544 18.544 18.544-8.303 18.544-18.544z&quot; fill-rule=&quot;evenodd&quot;/>
-      </svg>
-      <!-- Texto &quot;VanRace&quot; centralizado dentro do ícone -->
-      <div class=&quot;nome-jornal&quot;>VanRace</div>
-    </div>
-  </a>
-  
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ..., 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0 a 11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos que serão alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo: se for julho (índice 6), utiliza o degradê; para os demais, usa a cor sólida
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-    
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-    
-    // Aplica a cor do ícone (atributo fill do SVG)
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="73d6acc5196da805_0" name="73d6acc5196da805_0" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=862761073"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.70618bcc1e25db12_0" class="hJDwNd-AhqUyc-R6PoUb Ft7HRd-AhqUyc-R6PoUb purZT-AhqUyc-R6PoUb ZcASvf-AhqUyc-R6PoUb pSzOP-AhqUyc-R6PoUb Ktthjf-AhqUyc-R6PoUb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 100%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html> 
-<html lang=&quot;pt-BR&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <title>Ícone Ranking Responsivo - Cores Dinâmicas</title>
-  <!-- Importação da fonte &quot;Poppins&quot; -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <!-- Meta tag para garantirmos responsividade em todos os dispositivos -->
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <style>
-    /* Centraliza o conteúdo da página */
-    body {
-      margin: 0;
-      height: 100vh;
-      display: -ms-flexbox;       /* Suporte para IE10/11 */
-      display: flex;
-      -ms-flex-align: center;
-      align-items: center;
-      -ms-flex-pack: center;
-      justify-content: center;
-      background-color: transparent;
-      overflow: hidden;  /* Evita barras de rolagem */
-    }
-    
-    /* O link envolve todo o componente, removendo a decoração padrão */
-    a.icone-link {
-      text-decoration: none;
-      color: inherit;
-      display: inline-block;
-    }
-    
-    /* Container do ícone com tamanho fluido usando clamp:
-       - O tamanho ficará entre 85px (mínimo) e 120px (máximo),
-       - Escalando com 40vw no meio.
-    */
-    .icone-jornal {
-      width: clamp(85px, 40vw, 120px);
-      height: clamp(85px, 40vw, 120px);
-      background-color: #2D81B2; /* Cor padrão que será substituída via script */
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    /* O SVG ocupa 50% do container para manter a proporção */
-    .icone-jornal svg {
-      width: 50%;
-      height: auto;
-    }
-    
-    /* O texto escala de forma fluida também, entre 15px e 16px,
-       utiliza a fonte &quot;Poppins&quot; e exibe a inicial de cada palavra em maiúscula.
-    */
-    .nome-jornal {
-      font-family: 'Poppins', sans-serif;
-      font-size: clamp(13px, 2vw, 13px);
-      font-weight: bold;
-      text-transform: capitalize;
-      color: #FFFFFF; /* Cor padrão que será substituída via script */
-      margin-top: 6px;
-      margin-bottom: 3px;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <!-- Link que envolve o componente e redireciona para a URL desejada -->
-  <a class=&quot;icone-link&quot; href=&quot;https://sites.google.com/view/portalpsr/in%C3%ADcio/ranking&quot;>
-    <div class=&quot;icone-jornal&quot;>
-      <!-- Novo ícone em SVG com a arte em branco (o fill será alterado via script) -->
-      <svg id=&quot;Layer_1&quot; enable-background=&quot;new 0 0 34 34&quot; height=&quot;512&quot; viewBox=&quot;0 0 34 34&quot; width=&quot;512&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; fill=&quot;#FFFFFF&quot;>
-        <g>
-          <g>
-            <g>
-              <path d=&quot;m9.2 33h-7.2c-.5 0-1-.5-1-1v-7.3c0-.6.5-1 1-1h7v8.3c0 .3.1.7.2 1z&quot;/>
-            </g>
-          </g>
-          <g>
-            <g>
-              <path d=&quot;m23 20v12c0 .5-.5 1-1 1h-10c-.5 0-1-.5-1-1v-12c0-.6.5-1 1-1h10c.5 0 1 .4 1 1z&quot;/>
-            </g>
-          </g>
-          <g>
-            <g>
-              <path d=&quot;m33 26v6c0 .5-.5 1-1 1h-7.2c.1-.3.2-.7.2-1v-7h7c.5 0 1 .4 1 1z&quot;/>
-            </g>
-          </g>
-          <g>
-            <g>
-              <path d=&quot;m25.1 8-3.3 3.2.8 4.6c.1.4-.1.8-.4 1s-.8.2-1.1.1l-4.1-2.2-4.1 2.1c-.3.2-.7.2-1-.1-.3-.2-.5-.6-.4-1l.8-4.6-3.4-3.1c-.2-.2-.3-.6-.2-1s.4-.6.8-.7l4.6-.7 2-4.1c.3-.7 1.5-.7 1.8 0l2 4.1 4.6.7c.4.1.7.3.8.7s0 .8-.2 1z&quot;/>
-            </g>
-          </g>
-        </g>
-      </svg>
-      <!-- Texto &quot;Ranking&quot; centralizado dentro do ícone -->
-      <div class=&quot;nome-jornal&quot;>Ranking</div>
-    </div>
-  </a>
-  
-  <script>
-    // Mapeamento de cores por mês (0 = Janeiro, 1 = Fevereiro, ..., 11 = Dezembro)
-    const coresPorMes = {
-      0: { // Janeiro
-        fundo: &quot;#cfd0d5&quot;,
-        texto: &quot;#000000&quot;
-      },
-      1: { // Fevereiro
-        fundo: &quot;#ff7709&quot;,
-        texto: &quot;#FFFFFF&quot;
-      },
-      2: { // Março
-        fundo: &quot;#fec9d9&quot;,
-        texto: &quot;#b6063b&quot;
-      },
-      3: { // Abril
-        fundo: &quot;#abc8e7&quot;,
-        texto: &quot;#20466f&quot;
-      },
-      4: { // Maio
-        fundo: &quot;#ff7bac&quot;,
-        texto: &quot;#89103d&quot;
-      },
-      5: { // Junho
-        fundo: &quot;#588644&quot;,
-        texto: &quot;#154003&quot;
-      },
-      6: { // Julho - degradê
-        fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;,
-        texto: &quot;#574a20&quot;
-      },
-      7: { // Agosto
-        fundo: &quot;#886aaa&quot;,
-        texto: &quot;#513176&quot;
-      },
-      8: { // Setembro
-        fundo: &quot;#ffce59&quot;,
-        texto: &quot;#594d31&quot;
-      },
-      9: { // Outubro
-        fundo: &quot;#f6c0d8&quot;,
-        texto: &quot;#9a335d&quot;
-      },
-      10: { // Novembro
-        fundo: &quot;#d4eff1&quot;,
-        texto: &quot;#034d72&quot;
-      },
-      11: { // Dezembro
-        fundo: &quot;#b42619&quot;,
-        texto: &quot;#7b0d0d&quot;
-      }
-    };
-
-    // Obtemos o mês atual (0 a 11)
-    const dataAtual = new Date();
-    const mesAtual = dataAtual.getMonth();
-    const configuracao = coresPorMes[mesAtual];
-
-    // Seleciona os elementos que serão alterados
-    const iconeJornal = document.querySelector('.icone-jornal');
-    const nomeJornal = document.querySelector('.nome-jornal');
-    const svgIcon = document.querySelector('.icone-jornal svg');
-
-    // Aplica a cor de fundo: se for julho (índice 6), utiliza o degradê; para os demais, aplica a cor sólida
-    if (iconeJornal) {
-      if (mesAtual === 6) {
-        iconeJornal.style.background = configuracao.fundo;
-      } else {
-        iconeJornal.style.backgroundColor = configuracao.fundo;
-      }
-    }
-    
-    // Aplica a cor do texto
-    if (nomeJornal) {
-      nomeJornal.style.color = configuracao.texto;
-    }
-    
-    // Aplica a cor do ícone (atributo fill do SVG)
-    if (svgIcon) {
-      svgIcon.setAttribute('fill', configuracao.texto);
-    }
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="70618bcc1e25db12_0" name="70618bcc1e25db12_0" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=716781678"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div></div></div></section><section id="h.23bb0593f036e159_5" class="yaqOZd"><div class="IFuOkc"></div><div class="mYVXT"><div class="LS81yb VICjCf j5pSsc db35Fc" tabindex="-1"><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb purZT-AhqUyc-II5mzb ZcASvf-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.23bb0593f036e159_8" class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 13.164556962%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html>
-<html lang=&quot;pt&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot; />
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <title>Display com Frase Diária</title>
-  <!-- Importa a fonte Poppins do Google Fonts -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-
-  <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Poppins', sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      background: #f4f4f4;
-    }
-    .display {
-      width: 100%;
-      max-width: 800px;
-      height: 50px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      box-sizing: border-box;
-      overflow: hidden;
-      text-align: center;
-      padding: 0 15px;
-      border-radius: 10px;
-    }
-    #daily-quote {
-      margin: 0;
-      white-space: normal;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
-      line-height: 1.2;
-      display: inline-block;
-      transition: opacity 1s ease-in-out;
-      opacity: 1;
-      font-size: 1.2rem;
-    }
-    @keyframes flashAnimation {
-      0%   { filter: brightness(1) hue-rotate(0deg); }
-      50%  { filter: brightness(2) hue-rotate(45deg); }
-      100% { filter: brightness(1) hue-rotate(0deg); }
-    }
-    .flash {
-      animation: flashAnimation 1s ease-in-out 2;
-    }
-  </style>
-</head>
-<body>
-  <div class=&quot;display&quot;>
-    <p id=&quot;daily-quote&quot;>Frase do dia:</p>
-  </div>
-
-  <script>
-  document.addEventListener(&quot;DOMContentLoaded&quot;, function() {
-    // FLASH INICIAL
-    const displayContainer = document.querySelector(&quot;.display&quot;);
-    displayContainer.classList.add(&quot;flash&quot;);
-    setTimeout(() => displayContainer.classList.remove(&quot;flash&quot;), 2000);
-
-    // CORES POR MÊS
-    const coresPorMes = {
-      0: { fundo: &quot;#cfd0d5&quot;, texto: &quot;#000000&quot; },
-      1: { fundo: &quot;#ff7709&quot;, texto: &quot;#FFFFFF&quot; },
-      2: { fundo: &quot;#fec9d9&quot;, texto: &quot;#b6063b&quot; },
-      3: { fundo: &quot;#abc8e7&quot;, texto: &quot;#20466f&quot; },
-      4: { fundo: &quot;#ff7bac&quot;, texto: &quot;#89103d&quot; },
-      5: { fundo: &quot;#588644&quot;, texto: &quot;#154003&quot; },
-      6: { fundo: &quot;linear-gradient(to right, #01a75b, #fecd2a)&quot;, texto: &quot;#574a20&quot; },
-      7: { fundo: &quot;#886aaa&quot;, texto: &quot;#513176&quot; },
-      8: { fundo: &quot;#ffce59&quot;, texto: &quot;#594d31&quot; },
-      9: { fundo: &quot;#f6c0d8&quot;, texto: &quot;#9a335d&quot; },
-      10:{ fundo: &quot;#d4eff1&quot;, texto: &quot;#034d72&quot; },
-      11:{ fundo: &quot;#b42619&quot;, texto: &quot;#7b0d0d&quot; }
-    };
-    const now = new Date(), month = now.getMonth();
-    const cfg = coresPorMes[month];
-    if (month === 6) {
-      displayContainer.style.background = cfg.fundo;
-    } else {
-      displayContainer.style.backgroundColor = cfg.fundo;
-    }
-    const displayElement = document.getElementById(&quot;daily-quote&quot;);
-    displayElement.style.color = cfg.texto;
-
-    // LISTA DE FRASES
-    const quotes = [
-&quot;“Onde há poder, há resistência.” - Michel Foucault&quot;,
-&quot;“Os sábios falam porque têm algo a dizer; os tolos falam porque têm que dizer algo.” - Platão&quot;,
-&quot;“O homem é, por natureza, um animal político.” - Aristóteles&quot;,
-&quot;“Não gaste sua indignação apenas em revolta; use-a para abastecer ações concretas.”&quot;,
-&quot;“Egoísmo cria muros; empatia constrói pontes.”&quot;,
-&quot;“Não me pergunte quem sou, nem me diga para permanecer o mesmo.” - Michel Foucault&quot;,
-&quot;“O pensamento crítico cresce onde há liberdade de questionar e disposição de ouvir.”&quot;,
-&quot;“Apressa-te a viver bem e pensa que cada dia é, por si só, uma vida.” - Sêneca&quot;,
-&quot;“O perdão não apaga erros, mas impede que eles guiem nosso futuro.”&quot;,
-&quot;“O ser humano carece mais de sentido do que de certezas.”&quot;,
-&quot;“A vitalidade da esperança se nutre na convicção de que o bem pode prevalecer.”&quot;,
-&quot;“Falar do que nos incomoda sem agir é como saber o problema sem buscar a solução.”&quot;,
-&quot;“Não penses mal dos que procedem mal; pensa somente que estão equivocados.” - Sócrates&quot;,
-&quot;“O impossível começa a ganhar forma quando se abre um espaço de dúvida sobre sua impossibilidade.”&quot;,
-&quot;“A vontade de aprender é a faísca que ascende as grandes transformações pessoais.”&quot;,
-&quot;“Ama e faz o que quiseres.” - Santo Agostinho&quot;,
-&quot;“A escassez de atenção é a grande pobreza destes tempos acelerados.”&quot;,
-&quot;“A raiva, quando bem conduzida, pode ser combustível para uma justa transformação.”&quot;,
-&quot;“Não existe vida significativa sem paixão pelo que se faz.” - Clóvis de Barros Filho&quot;,
-&quot;“Buscar a paz é cultivar a justiça; sem justiça, a paz não passa de ilusão.”&quot;,
-&quot;“Enquanto não perdemos o medo de perder tudo, não começamos a viver.” - Luiz Felipe Pondé&quot;,
-&quot;“A verdadeira grandeza está em aprender diariamente, jamais supondo que sabemos o suficiente.”&quot;,
-&quot;“Seu tempo de vida é a sua maior riqueza; use-o para cultivar o que realmente importa.”&quot;,
-&quot;“Ter fé na humanidade é apostar na capacidade de cada pessoa para o bem.”&quot;,
-&quot;“Para encontrar a si mesmo, pense por si mesmo.” - Sócrates&quot;,
-&quot;“A esperança é um princípio vital: enquanto há vida, há esperança.”&quot;,
-&quot;“Sacrifício sem propósito é mero sofrimento; com propósito, é construção de algo maior.”&quot;,
-&quot;“Para quem crê, nenhuma explicação é necessária; para quem não crê, nenhuma explicação é possível.” - Tomás de Aquino&quot;,
-&quot;“A convivência floresce a humanidade; no isolamento, crescem as incompreensões.”&quot;,
-&quot;“É parte da cura o desejo de ser curado.” - Sêneca&quot;,
-&quot;“Emprego é fonte de renda; trabalho é fonte de vida.” - Mário Sérgio Cortella&quot;,
-&quot;“Carregar mágoas é como manter pedras no bolso: só pesa em quem as leva.”&quot;,
-&quot;“Devemos observar o passado sem nos aprisionar a ele; aprender e seguir adiante é ato de sabedoria.”&quot;,
-&quot;“A música é para a alma o que a ginástica é para o corpo.” - Platão&quot;,
-&quot;“Quem tem um porquê para viver pode suportar quase qualquer como.” - Friedrich Nietzsche&quot;,
-&quot;“A força da vontade pode erguer pontes onde a razão viu apenas abismos.”&quot;,
-&quot;“O amor genuíno não compete, soma forças e multiplica horizontes.”&quot;,
-&quot;“A amizade é uma alma em dois corpos.” - Aristóteles&quot;,
-&quot;“Cumpra deveres com a mesma intensidade com que se reivindica direitos; o senso de coletividade depende disso.”&quot;,
-&quot;“A coragem aparece quando a importância de agir supera o medo de falhar.”&quot;,
-&quot;“A adversidade molda a argila que somos, revelando nossa forma mais autêntica.”&quot;,
-&quot;“É necessário cuidar da ética para não anestesiarmos a nossa consciência e começarmos a achar que tudo é normal.” - Mário Sérgio Cortella&quot;,
-&quot;“Toda escolha revela quem somos; por isso, escolha com consciência e coragem.”&quot;,
-&quot;“O eu não é dono de sua própria casa.” - Sigmund Freud&quot;,
-&quot;“Transporte um punhado de terra todos os dias e construirás uma montanha.” - Confúcio&quot;,
-&quot;“A lealdade é fruto da harmonia entre nossos valores e nossas ações.”&quot;,
-&quot;“Exige muito de ti e espera pouco dos outros. Assim, evitarás muitos aborrecimentos.” - Confúcio&quot;,
-&quot;“Fechar ciclos com gratidão abre espaço para novos começos cheios de esperança.”&quot;,
-&quot;“Quando o conhecimento se alia à bondade, ambos encontram potência para transformar realidades.”&quot;,
-&quot;“A paciência só é virtude quando se alia à ação no momento oportuno.”&quot;,
-&quot;“A cada dia, escrevemos uma versão renovada de nós mesmos; não desperdice a oportunidade de evoluir.”&quot;,
-&quot;“Desanimar é perder a alma do caminho; retomar o ânimo é reencontrar a força de seguir.”&quot;,
-&quot;“A coragem não exige a ausência de medo, mas a força de seguir adiante apesar dele.”&quot;,
-&quot;“Jamais se arrependa de ser gentil; nenhum ato de bondade é em vão.”&quot;,
-&quot;“O sol nasce todo dia para quem decide enxergar a claridade.”&quot;,
-&quot;“A presença de espírito se revela na calma diante do caos.”&quot;,
-&quot;“Felicidade é conservar energia para coisas que valem a pena.” - Leandro Karnal&quot;,
-&quot;“Sonhar não é fugir da realidade, mas recusar viver sem propósito.”&quot;,
-&quot;“Não tema o erro: tema a recusa de aprender com ele.”&quot;,
-&quot;“O dia amanhece para quem arrisca acordar a alma antes do sol.”&quot;,
-&quot;“Eu escuto e esqueço. Eu vejo e lembro. Eu faço e compreendo.” - Confúcio&quot;,
-&quot;“Ideias não envelhecem quando nascem da honestidade e do desejo de aprimorar o coletivo.”&quot;,
-&quot;“A arte de recomeçar é irmã da resiliência.”&quot;,
-&quot;“O destino embaralha as cartas, e nós jogamos.” - Arthur Schopenhauer&quot;,
-&quot;“Todo dia é um recomeço para quem se permite reescrever a própria história.”&quot;,
-&quot;“Feche a porta ao fatalismo e abra janelas para a renovação.”&quot;,
-&quot;“Ver o que é certo e não fazê-lo é falta de coragem.” - Confúcio&quot;,
-&quot;“Aquilo que não me mata, me torna mais forte.” - Friedrich Nietzsche&quot;,
-&quot;“O que eu penso não muda nada além do meu pensamento; o que eu faço a partir disso muda tudo!” - Leandro Karnal&quot;,
-&quot;“Seja coerente entre o que fala e o que faz; a integridade não se ensina, se demonstra.”&quot;,
-&quot;“A modéstia verdadeira não oculta o valor próprio, apenas o exibe com discrição.”&quot;,
-&quot;“Nós nunca somos tão desamparadamente infelizes como quando perdemos um amor.” - Sigmund Freud&quot;,
-&quot;“Sábio não é quem tudo sabe, mas quem não se cansa de perguntar.”&quot;,
-&quot;“Sofremos mais na imaginação do que na realidade.” - Sêneca&quot;,
-&quot;“A compaixão é a ponte que liga o sofrimento do outro ao nosso desejo de ajudar.”&quot;,
-&quot;“Quem reclama do mundo sem nele intervir perde a chance de construir a diferença que deseja.”&quot;,
-&quot;“A liberdade se revela quando deixamos de nos escravizar pelos próprios medos.”&quot;,
-&quot;“A felicidade é a pretensão ilusória de converter um instante de alegria em eternidade.” - Clóvis de Barros Filho&quot;,
-&quot;“Tenha a coragem de aprender até o último dia; envelhece a mente que cessa de se abrir.”&quot;,
-&quot;“A ética é o conjunto de princípios e valores que orienta nossa conduta na vida em comum.”&quot;,
-&quot;“Gente não nasce pronta e vai se gastando; gente nasce não-pronta e vai se fazendo.” - Mário Sérgio Cortella&quot;,
-&quot;“A nossa felicidade depende mais do que temos nas nossas cabeças do que do que temos nos nossos bolsos.” - Arthur Schopenhauer&quot;,
-&quot;“A felicidade não é a recompensa da virtude, mas a própria virtude.” - Spinoza&quot;,
-&quot;“A virtude está no meio termo.” - Aristóteles&quot;,
-&quot;“O progresso coletivo começa quando entendemos que a sua conquista beneficia a todos, sem exceção.”&quot;,
-&quot;“Uma vida com sentido é aquela em que propósito e ação caminham de mãos dadas.”&quot;,
-&quot;“Ser fiel a si mesmo é honrar o que se sente e se pensa com sinceridade.”&quot;,
-&quot;“A pobreza não vem da diminuição das riquezas, mas da multiplicação dos desejos.” - Platão&quot;,
-&quot;“Espiritualidade não é fuga do real; é trazer um sentido mais profundo à vida concreta.”&quot;,
-&quot;“Não rir, não lamentar, nem odiar, mas compreender.” - Spinoza&quot;,
-&quot;“A vida é feita de escolhas, e até não escolher é uma escolha.” - Leandro Karnal&quot;,
-&quot;“Faça o teu melhor, nas condições que você tem, enquanto não tem condições melhores para fazer melhor ainda.” - Mário Sérgio Cortella&quot;,
-&quot;“Sem música, a vida seria um erro.” - Friedrich Nietzsche&quot;,
-&quot;“Somos feitos de carne, mas temos de viver como se fôssemos de ferro.” - Sigmund Freud&quot;,
-&quot;“Renovar-se exige abandonar fardos que só atrasam a caminhada.”&quot;,
-&quot;“Ame sem medida, mas estabeleça limites para que o amor também respeite a si mesmo.”&quot;,
-&quot;“Festeje as conquistas; nelas repousa a força para encarar as próximas batalhas.”&quot;,
-&quot;“Temo o homem de um só livro.” - Tomás de Aquino&quot;,
-&quot;“A leitura abre janelas na mente; a partilha do que lemos areja todo o ambiente social.”&quot;,
-&quot;“É no silêncio que muitas respostas surgem; mas é na ação que essas respostas ganham forma.”&quot;,
-&quot;“Esperar é ficar parado; esperançar é caminhar rumo à mudança necessária.”&quot;,
-&quot;“A honestidade consigo mesmo é a bússola que evita atalhos desonestos.”&quot;,
-&quot;“O valor do conhecimento não está no acúmulo, mas na capacidade de empregá-lo para o bem.”&quot;,
-&quot;“A verdadeira riqueza está em partilhar o que se sabe e o que se sente.”&quot;,
-&quot;“Cada decisão alimenta ou diminui a nossa humanidade: escolha com cuidado.”&quot;,
-&quot;“Não basta querer mudar o mundo; é preciso mudar a nós mesmos dentro dele.”&quot;,
-&quot;“Se você quer caminhar rápido, pode ir sozinho; mas, se quer ir longe, aprenda a caminhar junto.”&quot;,
-&quot;“Um coração grato enxerga no erro o caminho para chegar ao acerto.”&quot;,
-&quot;“Ser ético é recusar privilégios que machucam a dignidade alheia.”&quot;,
-&quot;“Ter paciência é reconhecer o tempo certo; apressar-se é esquecer a sabedoria dos ciclos.”&quot;,
-&quot;“A memória do ontem dá direção ao hoje e lança a semente do amanhã.”&quot;,
-&quot;“Cooperar é reconhecer que ninguém floresce sozinho; precisamos semear em conjunto.”&quot;,
-&quot;“Dê tempo à mente para pensar, e ao coração para sentir; a pressa consome percepções valiosas.”&quot;,
-&quot;“Mesmo a mais escura noite pode abrigar uma fagulha de esperança.”&quot;,
-&quot;“Facilidade é o nome que os vagabundos dão ao esforço alheio.” - Leandro Karnal&quot;,
-&quot;“O ato de pensar exige pausa; faça silêncio interno para que novas ideias possam florescer.”&quot;,
-&quot;“Errar não é o problema; não desejar corrigir o erro é o que paralisa nossa evolução.”&quot;,
-&quot;“A rotina sem reflexão é como um rio que corre sem saber seu destino.”&quot;,
-&quot;“Se queres ser amado, ama.” - Sêneca&quot;,
-&quot;“A voz do intelecto é suave, mas não descansa até ser ouvida.” - Sigmund Freud&quot;,
-&quot;“Quando a multidão exerce autoridade, ela é mais cruel do que os tiranos.” - Platão&quot;,
-&quot;“O conhecimento amplia a alma, mas é a sabedoria que a conduz.” - Leandro Karnal&quot;,
-&quot;“Quem conhece sua fragilidade aprende a acolher a fragilidade dos outros.”&quot;,
-&quot;“A tarefa de viver é dura, mas fascinante.” - Clóvis de Barros Filho&quot;,
-&quot;“Ser firme não significa ser duro; gentileza pode existir lado a lado com convicção.”&quot;,
-&quot;“Os encontros que nos transformam são aqueles em que doamos parte de nós e acolhemos parte do outro.”&quot;,
-&quot;“O sonho é a estrada real que conduz ao inconsciente.” - Sigmund Freud&quot;,
-&quot;“A chave para um futuro sólido é forjar vínculos que suportem as incertezas.”&quot;,
-&quot;“A conquista própria é a maior das vitórias.” - Platão&quot;,
-&quot;“Liberdade é fazer o que não prejudica outra pessoa.”&quot;,
-&quot;“Palavras que curam nascem de corações empáticos.”&quot;,
-&quot;“Se queres conhecer a uma pessoa, não perguntes o que pensa, e sim o que ama.” - Santo Agostinho&quot;,
-&quot;“A humildade não diminui o valor de quem a pratica; ao contrário, engrandece seu espírito.”&quot;,
-&quot;“Quando paramos de perguntar o porquê das coisas, paramos de crescer.”&quot;,
-&quot;“A busca da verdade exige desmontar crenças antigas e ter abertura ao novo.”&quot;,
-&quot;“A mente só se ilumina quando confrontamos nossas crenças com a realidade.”&quot;,
-&quot;“Os milagres não contrariam a natureza; apenas contrariam o que sabemos da natureza.” - Santo Agostinho&quot;,
-&quot;“Amadurecer é um processo contínuo, não um estado final.”&quot;,
-&quot;“Liderar é pôr-se a serviço; quando o poder se inverte e quer servir a si mesmo, deixa de ser legítimo.”&quot;,
-&quot;“A misericórdia sem justiça é mãe da dissolução; a justiça sem misericórdia é crueldade.” - Tomás de Aquino&quot;,
-&quot;“O todo é maior do que a soma de suas partes.” - Aristóteles&quot;,
-&quot;“A coragem não mora em grandes gestos, mas na disposição de melhorar um pouco a cada dia.”&quot;,
-&quot;“Seus sonhos merecem esforço, não apenas desejo.”&quot;,
-&quot;“A esperança sofre sem perder a fé; o desespero renuncia antes de lutar.”&quot;,
-&quot;“Calar pode ser sabedoria ou omissão; entender a diferença é o que distingue o prudente do conivente.”&quot;,
-&quot;“Temos a arte para não morrer da verdade.” - Friedrich Nietzsche&quot;,
-&quot;“Conflito é a divergência que pode construir entendimento; confronto é a tentativa de anular o outro.”&quot;,
-&quot;“Uma vida não examinada não vale a pena ser vivida.” - Sócrates&quot;,
-&quot;“Nunca estaremos totalmente prontos; a vida é, sobretudo, um esboço contínuo.”&quot;,
-&quot;“A vida boa não é a vida perfeita, mas a que faz sentido apesar das imperfeições.”&quot;,
-&quot;“Trabalhar em equipe é descobrir que somar visões gera um horizonte mais amplo.”&quot;,
-&quot;“Minha posição não é que tudo seja ruim, mas que tudo é perigoso.” - Michel Foucault&quot;,
-&quot;“A vida precisa valer agora.” - Clóvis de Barros Filho&quot;,
-&quot;“A paz não é a ausência de guerra; é uma virtude, uma disposição benevolente, confiança e justiça.” - Spinoza&quot;,
-&quot;“A solidão é a sorte de todos os espíritos excelentes.” - Arthur Schopenhauer&quot;,
-&quot;“A certeza permite que façamos aquilo que já vínhamos fazendo. A dúvida nos permite avançar em territórios desconhecidos.” - Mário Sérgio Cortella&quot;,
-&quot;“A pacificação verdadeira nasce na escuta; pouco adianta falar sem compreender.”&quot;,
-&quot;“Se ninguém escuta, transforme sua voz em ação; atitudes repercutem mesmo no silêncio.”&quot;,
-&quot;“Felicidade não é neblina passageira, mas a clareza de saber valorizar o agora.”&quot;,
-&quot;“Muitos lamentam a falta de tempo; poucos notam quanto de vida se desperdiça sem reflexão.”&quot;,
-&quot;“Não há vento favorável para quem não sabe aonde vai.” - Sêneca&quot;,
-&quot;“Os dois inimigos da felicidade humana são a dor e o tédio.” - Arthur Schopenhauer&quot;,
-&quot;“Gentileza é a força que desarma hostilidades e aproxima corações.”&quot;,
-&quot;“A paciência é um exercício de fé na espera e na ação que virá.”&quot;,
-&quot;“A fé é crer no que não vês; a recompensa dessa fé é ver aquilo em que crês.” - Santo Agostinho&quot;,
-&quot;“Liberdade é poder ir e vir sem acorrentar o outro às nossas vontades.”&quot;,
-&quot;“Cuidar dos outros não é paternalismo, mas manifestação de humanidade.”&quot;,
-&quot;“Torna-te aquilo que és.” - Friedrich Nietzsche&quot;,
-&quot;“Quem respeita o passado constrói o futuro com alicerces mais firmes.”&quot;,
-&quot;“Educar é libertar, não adestrar.”&quot;,
-&quot;“A raiva se dissolve no ato de compreender, ainda que não se concorde.”&quot;,
-&quot;“Perdoar é libertar o outro e a si mesmo das correntes do ressentimento.”&quot;,
-&quot;“Cada ser humano é um universo; não despreze a riqueza contida nas histórias do outro.”&quot;,
-&quot;“Toda escolha revela quem somos; por isso, escolha com consciência e coragem.”&quot;,
-&quot;“O estudo sério não nos afasta das pessoas; ao contrário, desperta em nós maior responsabilidade coletiva.”&quot;,
-&quot;“A beleza do mundo aumenta quando respeitamos cada forma de vida.”&quot;,
-&quot;“Nenhum aprendizado real se dá apenas no acerto; a correção do erro é o passo-chave da evolução.”&quot;,
-&quot;“Resiliência é lembrar que a tempestade passa, mas o aprendizado fica.”&quot;,
-&quot;“A presença atenta vale mais que qualquer presente luxuoso.”&quot;,
-&quot;“A vida honrosa é o que fazemos dela; ainda que não realize todo o desejado, não deixe de ter honradas as escolhas quando estas podem ser feitas.” - Mário Sérgio Cortella&quot;,
-&quot;“A educação tem raízes amargas, mas seus frutos são doces.” - Aristóteles&quot;,
-&quot;“Não faças aos outros aquilo que não queres que te façam.” - Confúcio&quot;,
-&quot;“A natureza não nos pertence; nós é que pertencemos a ela e precisamos cuidar do nosso lugar comum.”&quot;,
-&quot;“Um líder inspira mais pelo caráter do que pelos discursos que profere.”&quot;,
-&quot;“Não despreze seus talentos: eles podem ser a ponte para o sonho de muitos.”&quot;,
-&quot;“A simplicidade não é menos; é saber valorizar o essencial.”&quot;,
-&quot;“Aprender a aprender é talvez a maior lição da existência.”&quot;,
-&quot;“O poder, longe de estorvar o saber, o produz.” - Michel Foucault&quot;,
-&quot;“Prefiro o conhecimento à riqueza, pois o primeiro é perene, enquanto o segundo é caduco.” - Sócrates&quot;,
-&quot;“O amor é uma alegria acompanhada pela ideia de uma causa exterior.” - Baruch Spinoza&quot;,
-&quot;“O verdadeiro amor cresce com as dificuldades; o falso, se apaga.” - Tomás de Aquino&quot;,
-&quot;“A motivação é uma porta que se abre por dentro.” - Mário Sérgio Cortella&quot;,
-&quot;“Educar é ter esperança. Amar é ter esperança. Viver é esposar a esperança.” - Leandro Karnal&quot;,
-&quot;“Todo chiste, no fundo, encobre uma verdade.” - Sigmund Freud&quot;,
-&quot;“Quem me dá a liberdade me joga num vazio difícil de ser preenchido.” - Leandro Karnal&quot;,
-&quot;“O saber é o único espaço de liberdade do ser.” - Michel Foucault&quot;,
-&quot;“A felicidade é sinônimo de fertilidade. Fertilidade é impedir que a vida cesse na sua múltipla condição.” - Mário Cortella&quot;,
-&quot;“Buscando o bem de nossos semelhantes, encontraremos o nosso.” - Platão&quot;,
-&quot;“Tudo quanto acontece, acontece por necessidade.” - Baruch Spinoza&quot;,
-&quot;“De tuas vulnerabilidades sairão tuas forças.” - Sigmund Freud&quot;,
-&quot;“Quanto menos inteligente um homem é, menos misteriosa lhe parece a existência.” - Arthur Schopenhauer&quot;,
-&quot;“A medida do amor é amar sem medida.” - Santo Agostinho&quot;,
-&quot;“A juventude está feita para o aprendizado, não para o prazer.” - Aristóteles&quot;,
-&quot;“Só há um bem: o conhecimento. Só há um mal: a ignorância.” - Sócrates&quot;,
-&quot;“A vida vale a pena quando você torce para ela não acabar.” - Clóvis de Barros Filho&quot;,
-&quot;“O dinheiro é uma felicidade humana abstrata; por isso, aquele que já não é capaz de apreciar a verdadeira felicidade humana, dedica-se completamente a ele.” - Arthur Schopenhauer&quot;,
-&quot;“A função da arte na sociedade é edificar, reconstruir-nos quando estamos em perigo de desmoronar.” - Sigmund Freud&quot;,
-&quot;“Democracia não é o paraíso, mas ela consegue garantir que a gente não chegue no inferno.” - Leandro Karnal&quot;,
-&quot;“Uma vida sem exame não vale a pena ser vivida.” - Sócrates&quot;,
-&quot;“A amizade é uma alma que habita em dois corpos; um coração que habita em duas almas.” - Aristóteles&quot;,
-&quot;“O valor de um homem não se mede por aquilo que possui, mas pelo que é capaz de superar.” - Sêneca&quot;,
-&quot;“A paixão é uma infecção passageira, curada automaticamente pelo tempo.” - Leandro Karnal&quot;,
-&quot;“A verdadeira riqueza é estar satisfeito com pouco.” - Sêneca&quot;,
-&quot;“O tempo cura o que a razão não pode.” - Sêneca&quot;,
-&quot;“Para alguém que tem fé, não é necessária nenhuma explicação; para quem não tem, nenhuma explicação é possível.” - Tomás de Aquino&quot;,
-&quot;“Para conhecermos os amigos é necessário passar pelo sucesso e pela desgraça. No sucesso, verificamos a quantidade e, na desgraça, a qualidade.” - Confúcio&quot;,
-&quot;“Podemos facilmente perdoar uma criança que tem medo do escuro; a real tragédia da vida é quando os homens têm medo da luz.” - Platão&quot;,
-&quot;“O mundo é um livro, e quem fica sentado em casa lê somente uma página.” - Santo Agostinho&quot;,
-&quot;“Não me arrependo de nada. Aquele que se arrepende do que fez é duplamente miserável.” - Baruch Spinoza&quot;,
-&quot;“Coloque a lealdade e a confiança acima de qualquer coisa; não te alies aos moralmente inferiores; não receies corrigir teus erros.” - Confúcio&quot;,
-&quot;“O homem é livre quando pode escolher entre diversas possibilidades.” - Aristóteles&quot;,
-&quot;“A ética é a inteligência compartilhada a serviço do aperfeiçoamento da convivência.” - Clóvis de Barros Filho&quot;,
-&quot;“As emoções não expressadas nunca morrerão. Estão enterradas vivas e aparecerão mais tarde de maneiras mais desagradáveis.” - Sigmund Freud&quot;,
-&quot;“Tente mover o mundo – o primeiro passo será mover a si mesmo.” - Platão&quot;,
-&quot;“A esperança tem duas filhas lindas: a indignação e a coragem.” - Santo Agostinho&quot;,
-&quot;“A rotina será prazerosa se eu enxergar o resultado dela como prazeroso.” - Mário Sérgio Cortella&quot;,
-&quot;“O verdadeiro amor é o amor da diferença, o amor igual é um amor narcísico.” - Leandro Karnal&quot;,
-&quot;“A esperança é o sonho do homem desperto.” - Aristóteles&quot;
-
-    ];
-
-    // UTILITÁRIOS
-    function countWeekdays(start, end) {
-      let c = 0, d = new Date(start);
-      while (d <= end) {
-        const wd = d.getDay();
-        if (wd !== 0 &amp;&amp; wd !== 6) c++;
-        d.setDate(d.getDate() + 1);
-      }
-      return c;
-    }
-    function resizeToFit(el, container) {
-      el.style.fontSize = &quot;20px&quot;;
-      let sz = parseFloat(getComputedStyle(el).fontSize);
-      while (el.scrollHeight > container.clientHeight &amp;&amp; sz > 8) {
-        sz -= 0.5;
-        el.style.fontSize = sz + &quot;px&quot;;
-      }
-    }
-    function getDailyQuote() {
-      const today = new Date(), dow = today.getDay();
-      if (dow === 0 || dow === 6) return &quot;&quot;;
-      const ref = new Date(&quot;2025-01-02T00:00:00&quot;);
-      const passed = countWeekdays(ref, today);
-      return quotes[(passed - 1) % quotes.length];
-    }
-
-    // CICLO DE EXIBIÇÃO
-    const quoteText = getDailyQuote();
-    const labelText = &quot;Reflexão do dia:&quot;;
-    const durQuote = 12000, durLabel = 2000, durTrans = 1000;
-
-    function fadeOut(cb) {
-      displayElement.style.opacity = 0;
-      setTimeout(cb, durTrans);
-    }
-    function fadeIn(txt, cb) {
-      displayElement.textContent = txt;
-      displayElement.style.opacity = 0;
-      resizeToFit(displayElement, displayContainer);
-      setTimeout(() => displayElement.style.opacity = 1, 50);
-      if (cb) setTimeout(cb, durTrans);
-    }
-    function cycle() {
-      fadeIn(quoteText, () => {
-        setTimeout(() => fadeOut(() => {
-          fadeIn(labelText, () => {
-            setTimeout(() => fadeOut(cycle), durLabel);
-          });
-        }), durQuote);
-      });
-    }
-
-    if (quoteText) {
-      cycle();
-    } else {
-      displayElement.textContent = labelText;
-    }
-  });
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="23bb0593f036e159_8" name="23bb0593f036e159_8" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=653237914"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div></div></div></section><section id="h.17b21c17dfeed842_8" class="yaqOZd"><div class="IFuOkc"></div><div class="mYVXT"><div class="LS81yb VICjCf j5pSsc db35Fc" tabindex="-1"><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb purZT-AhqUyc-II5mzb ZcASvf-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.17b21c17dfeed842_5" class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 12.6582278481%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<!DOCTYPE html>
-<html lang=&quot;pt&quot;>
-<head>
-  <meta charset=&quot;UTF-8&quot;>
-  <meta name=&quot;viewport&quot; content=&quot;width=device-width, initial-scale=1.0&quot;>
-  <title>Dias Sem Acidentes</title>
-  <!-- Importação da fonte Roboto -->
-  <link href=&quot;https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
-  <style>
-    /* Reset básico e remoção da rolagem */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html, body {
-      overflow: hidden; /* Remove a opção de barra de rolagem */
-      height: 100%;
-    }
-    body {
-      background: #f5f5f5;
-      font-family: 'Roboto', sans-serif;
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    /* Caixa fixa na parte inferior com altura de 50px, largura máxima de 400px e cantos arredondados */
-    .container {
-      background-color: #006400;
-      width: 100%;
-      max-width: 400px;
-      height: 50px;
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 15px;
-    }
-    /* Estilo do texto que não será negrito */
-    .counter {
-      font-size: 18px;
-      font-weight: normal;
-      color: #fff;
-    }
-    /* Destaque para a parte numérica e para &quot;dias&quot; */
-    .highlight {
-      font-size: 22px;
-      color: #ffd700;
-      font-weight: 700;
-      margin: 0 2px;
-    }
-  </style>
-</head>
-<body>
-  <div class=&quot;container&quot;>
-    <p class=&quot;counter&quot;>
-      👷 estamos <span id=&quot;days&quot; class=&quot;highlight&quot;>0</span><span class=&quot;highlight&quot;>dias</span> sem acidentes
-    </p>
-  </div>
-  
-  <script>
-    function updateCounter() {
-      // Data de início (ajuste conforme necessário)
-      const startDate = new Date(&quot;2024-04-09T00:00:00&quot;);
-      const currentDate = new Date();
-      
-      // Calcula a diferença em milissegundos e converte para dias
-      const diffTime = currentDate - startDate;
-      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
-      // Atualiza apenas o número destacado
-      document.getElementById(&quot;days&quot;).innerText = diffDays;
-    }
-    
-    // Atualiza o contador imediatamente e a cada segundo
-    updateCounter();
-    setInterval(updateCounter, 1000);
-  </script>
-</body>
-</html>
-" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="17b21c17dfeed842_5" name="17b21c17dfeed842_5" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=557572796"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div></div></div></section><section id="h.1368fc0327342fd5_9" class="yaqOZd WxWicb"><div class="IFuOkc"></div><div class="mYVXT"><div class="LS81yb VICjCf j5pSsc db35Fc" tabindex="-1"><div class="hJDwNd-AhqUyc-uQSCkd Ft7HRd-AhqUyc-uQSCkd purZT-AhqUyc-II5mzb ZcASvf-AhqUyc-II5mzb pSzOP-AhqUyc-qWD73c Ktthjf-AhqUyc-qWD73c JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.1368fc0327342fd5_12" class="hJDwNd-AhqUyc-uQSCkd Ft7HRd-AhqUyc-uQSCkd jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd baZpAe"><div class="iwQgFb" role="presentation"></div></div></div></div></div></div></div></div></div></div></section><section id="h.1368fc0327342fd5_0" class="yaqOZd"><div class="IFuOkc"></div><div class="mYVXT"><div class="LS81yb VICjCf j5pSsc db35Fc" tabindex="-1"><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb purZT-AhqUyc-II5mzb ZcASvf-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb JNdkSc SQVYQc"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"><div class="oKdM2c ZZyype Kzv0Me"><div id="h.1368fc0327342fd5_3" class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb pSzOP-AhqUyc-II5mzb Ktthjf-AhqUyc-II5mzb jXK9ad D2fZ2 zu5uec OjCsFc dmUFtb wHaque g5GTcb"><div class="jXK9ad-SmKAyb"><div class="tyJCtd OWlOyc baZpAe"><div jscontroller="VYKRW" jsaction="rcuQ6b:rcuQ6b;"><div class="WIdY2d M1aSXe"><div jsname="WXxXjd" style="padding-top: 13.164556962%"></div><div class="YMEQtf"><div jsname="jkaScf" jscontroller="szRU7e" class="w536ob" data-enable-interaction="true" data-url="https://1903933841-atari-embeds.googleusercontent.com/embeds/16cb204cf3a9d4d223a0a3fd8b0eec5d/inner-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__" data-code="<div class=&quot;alignment&quot; align=&quot;center&quot;><table class=&quot;social-table&quot; width=&quot;126px&quot; border=&quot;0&quot; cellpadding=&quot;0&quot; cellspacing=&quot;0&quot; role=&quot;presentation&quot; style=&quot;mso-table-lspace:0;mso-table-rspace:0;display:inline-block&quot;><tbody><tr><td style=&quot;padding:0 5px 0 5px&quot;>
-<a href=&quot;https://www.facebook.com/psrindustria&quot; target=&quot;_blank&quot;><img src=&quot;https://app-rsrc.getbee.io/public/resources/social-networks-icon-sets/circle-color/facebook@2x.png&quot; width=&quot;32&quot; height=&quot;auto&quot; alt=&quot;Facebook&quot; title=&quot;Facebook&quot; style=&quot;display:block;height:auto;border:0&quot;></a></td><td style=&quot;padding:0 5px 0 5px&quot;><a href=&quot;https://instagram.com/psrindustria&quot; target=&quot;_blank&quot;><img src=&quot;https://app-rsrc.getbee.io/public/resources/social-networks-icon-sets/circle-color/instagram@2x.png&quot; width=&quot;32&quot; height=&quot;auto&quot; alt=&quot;Instagram&quot; title=&quot;Instagram&quot; style=&quot;display:block;height:auto;border:0&quot;></a></td><td style=&quot;padding:0 5px 0 5px&quot;><a href=&quot;https://www.linkedin.com/company/psr-industria&quot; target=&quot;_blank&quot;><img src=&quot;https://app-rsrc.getbee.io/public/resources/social-networks-icon-sets/circle-color/linkedin@2x.png&quot; width=&quot;32&quot; height=&quot;auto&quot; alt=&quot;LinkedIn&quot; title=&quot;LinkedIn&quot; style=&quot;display:block;height:auto;border:0&quot;></a></td></tr></tbody></table></div>" jsaction="rcuQ6b:WYd;"><div class="EmVfjc qs41qe UzswCe" data-loadingmessage=" " jscontroller="qAKInc" jsaction="animationend:kWijWc;dyRcpb:dyRcpb" data-active="true" jsname="Hy6Uif" style="display: none;"><div class="Cg7hO" aria-live="assertive" jsname="vyyg5"> </div><div jsname="Hxlbvc" class="xu46lf"><div class="ir3uv uWlRce co39ub"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv GFoASc Cn087"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv WpeOqd hfsr6b"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div><div class="ir3uv rHV3jf EjXFBf"><div class="xq3j6 ERcjC"><div class="X6jHbb GOJTSe"></div></div><div class="HBnAAc"><div class="X6jHbb GOJTSe"></div></div><div class="xq3j6 dj3yTd"><div class="X6jHbb GOJTSe"></div></div></div></div></div><iframe jsname="WMhH6e" class=" YMEQtf" frameborder="0" sandbox="allow-scripts allow-popups allow-forms allow-same-origin allow-popups-to-escape-sandbox allow-downloads allow-storage-access-by-user-activation" id="1368fc0327342fd5_3" name="1368fc0327342fd5_3" scrolling="no" title="Incorporação personalizada" aria-label="Incorporação personalizada" src="https://www.gstatic.com/atari/embeds/83a60601c213b72fb19c1855fb0c5f26/intermediate-frame-minified.html?jsh=m%3B%2F_%2Fscs%2Fabc-static%2F_%2Fjs%2Fk%3Dgapi.lb.pt_BR.ATNbtiFo1ho.O%2Fd%3D1%2Frs%3DAHpOoo_1YLh20Lb4BdBxVY5iwPfQkmf_Og%2Fm%3D__features__&amp;r=982176521"></iframe></div></div></div></div></div></div></div></div></div></div></div><div class="hJDwNd-AhqUyc-II5mzb Ft7HRd-AhqUyc-II5mzb JNdkSc SQVYQc L6cTce-purZT L6cTce-pSzOP"><div class="JNdkSc-SmKAyb LkDMRd"><div class="" jscontroller="sGwD4d" jsaction="zXBUYb:zTPCnb;zQF9Uc:Qxe3nd;" jsname="F57UId"></div></div></div></div></div></section></div><div class="Xpil1b xgQ6eb"></div><div jscontroller="j1RDQb" jsaction="rcuQ6b:rcuQ6b;MxH79b:JdcaS;FaOgy:XuHpsb;" class="dZA9kd ynRLnc" data-last-updated-at-time="1746023168351" data-is-preview="false"><div role="button" class="U26fgb JRtysb WzwrXb I12f0b K2mXPb zXBiaf ynRLnc" jscontroller="iSvg6e" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;;keydown:I481le;" jsshadow="" jsname="Bg3gkf" aria-label="Ações do site" aria-disabled="false" tabindex="0" aria-haspopup="true" aria-expanded="false" data-menu-corner="bottom-start" data-anchor-corner="top-start" id="ow14" __is_owner="true"><div class="NWlf3e MbhUzd" jsname="ksKsZd"></div><span jsslot="" class="MhXXcc oJeWuf"><span class="Lw7GHd snByac"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class=" NMm5M"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg></span></span></div></div><div jscontroller="j1RDQb" jsaction="focusin:gBxDVb(srlkmf); focusout:zvXhGb(srlkmf); click:ro2KTd(psdQ5e);JIbuQc:DSypkd(Bg3gkf);MxH79b:JdcaS;rcuQ6b:rcuQ6b;" class="LqzjUe" data-last-updated-at-time="1746023168351" data-is-preview="false"><div jsname="psdQ5e" class="Q0cSn"></div><div jsname="bN97Pc" class="hBW7Hb"><div role="button" class="U26fgb mUbCce fKz7Od kpPxtd QMuaBc M9Bg4d" jscontroller="VXdfxd" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;touchstart:p6p2H; touchmove:FwuNnf; touchend:yfqBxc(preventDefault=true); touchcancel:JMtRjd;" jsshadow="" jsname="Bg3gkf" aria-label="Ações do site" aria-disabled="false" tabindex="-1" aria-hidden="true"><div class="VTBa7b MbhUzd" jsname="ksKsZd"></div><span jsslot="" class="xjKiLb"><span class="Ce1Y1c" style="top: -12px"><svg width="24" height="24" viewBox="0 0 24 24" focusable="false" class=" NMm5M"><path d="M11 17h2v-6h-2v6zm1-15C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zM11 9h2V7h-2v2z"></path></svg></span></span></div><div jsname="srlkmf" class="hUphyc"><div class="YkaBSd"><div class="iBkmkf"><span>Página atualizada</span> <span jsname="CFIm1b" class="dji00c" jsaction="AHmuwe:eGiyHb; mouseover:eGiyHb;" tabindex="0" role="contentinfo"></span></div></div><div class="YkaBSd" jsaction="click:Toy3n;"><div role="button" class="U26fgb kpPxtd J7BuEb" jsshadow="" jsname="V2zOu" aria-disabled="false" tabindex="0">Sites do Google</div></div><div class="YkaBSd" jscontroller="HYv29e" jsaction="click:dQ6O0c;" data-abuse-proto="%.@.null,&quot;110058354385645724112&quot;,&quot;https://sites.google.com/view/portalpsr&quot;]" data-abuse-reporting-widget-proto="%.@.null,&quot;https://sites.google.com/view/portalpsr&quot;]"><div role="button" class="U26fgb kpPxtd J7BuEb" jsshadow="" aria-label="Denunciar abuso" aria-disabled="false" tabindex="0">Denunciar abuso</div></div></div></div></div><div jsname="kdb7zb"><div jscontroller="kklOXe" jsmodel="nbZU0e" jsaction="rcuQ6b:rcuQ6b;FaOgy:nkegzf;BU3dg:U3QbAf;HRy4zb:Z8zbSc;" class="Pt0Du TSZdd"><div class="mF4yBc auswjd LItWS-bMElCd" jsname="LgbsSe"><div jscontroller="TW9Rvc" jsaction="rcuQ6b:WYd;"><div role="presentation" class="U26fgb XHsn7e MAXCNe M9Bg4d" jscontroller="VXdfxd" jsaction="click:cOuCgd; mousedown:UX7yZ; mouseup:lbsD7e; mouseenter:tfO1Yc; mouseleave:JywGue; focus:AHmuwe; blur:O22p3e; contextmenu:mg9Pef;" jsshadow="" jsname="LgbsSe" aria-label="Editar esta página" aria-disabled="false" data-tooltip="Editar esta página" data-tooltip-vertical-offset="-12" data-tooltip-horizontal-offset="0"><a class="FKF6mc TpQm9d" href="/u/0/d/13BwFdPLbHGpZrmuOHGtxsBw9y23i1TnT/edit?authuser=0&amp;usp=edit_published_site" aria-label="Editar esta página"><div class="HaXdpb wb61gb"></div><div class="HRp7vf MbhUzd" jsname="ksKsZd"></div><span jsslot="" class="Ip8zfc"><svg class="EI709d" viewBox="0 0 24 24" fill="currentColor" focusable="false"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path><path d="M0 0h24v24H0z" fill="none"></path></svg></span></a></div></div></div></div></div></div></div></div><script nonce="">DOCS_timing['cov']=new Date().getTime();</script><script src="https://www.gstatic.com/_/atari/_/js/k=atari.vw.pt_BR.zzUTh93zOnM.O/am=ADAAAg/d=1/rs=AGEqA5kyIylI8_UGiZx7KDXafUqJVvHk4w/m=view" id="base-js" nonce=""></script></div></div><div jscontroller="YV8yqd" jsaction="rcuQ6b:npT2md"></div></body></html>
