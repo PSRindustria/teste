@@ -95,14 +95,115 @@
             padding: 10px;
             margin-bottom: 10px;
             border-radius: 4px;
+            position: relative;
         }
         .event-title {
             font-weight: bold;
             margin-bottom: 5px;
+            color: #333;
         }
         .event-details {
             font-size: 14px;
             color: #555;
+            margin-bottom: 3px;
+        }
+        .event-status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .status-pendente {
+            background-color: #ffecb3;
+            color: #ff6f00;
+        }
+        .status-concluido {
+            background-color: #c8e6c9;
+            color: #2e7d32;
+        }
+        .status-atrasado {
+            background-color: #ffcdd2;
+            color: #c62828;
+        }
+        .event-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .btn-drive {
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-drive:hover {
+            background-color: #2a75f3;
+        }
+        .btn-comment {
+            background-color: #9E9E9E;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-comment:hover {
+            background-color: #757575;
+        }
+        .comment-form {
+            display: none;
+            margin-top: 10px;
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .comment-textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            resize: vertical;
+            margin-bottom: 10px;
+        }
+        .comment-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        .btn-send {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        .btn-send:hover {
+            background-color: #45a049;
+        }
+        .btn-cancel {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+        .btn-cancel:hover {
+            background-color: #e53935;
         }
         
         /* Estilos para a seção de próximos eventos */
@@ -172,6 +273,18 @@
             font-weight: bold;
             font-size: 18px;
         }
+        
+        /* Estilo para comentários existentes */
+        .event-comment {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #333;
+            font-style: italic;
+            border-left: 3px solid #9e9e9e;
+        }
     </style>
 </head>
 <body>
@@ -184,10 +297,7 @@
             <button onclick="nextMonth()">Próximo Mês &gt;</button>
         </div>
         
-        <button class="btn-refresh" onclick="fetchData()">Atualizar Dados</button>
-        
         <div id="error-message" class="error" style="display: none;"></div>
-        <div id="sheet-info" class="info" style="display: none;"></div>
         
         <div id="loading" class="loading">Carregando dados...</div>
         
@@ -256,11 +366,6 @@
                     // Renderizar o calendário
                     updateCalendarView();
                     
-                    // Adicionar informações extras
-                    const infoText = `Planilha: ${response.sheetName || 'N/A'} | Total de registros: ${response.totalRows || response.data.length}`;
-                    document.getElementById('sheet-info').textContent = infoText;
-                    document.getElementById('sheet-info').style.display = 'block';
-                    
                     loadingElement.style.display = 'none';
                     calendarContainer.style.display = 'block';
                 })
@@ -278,7 +383,7 @@
         function processEvents(data) {
             allEvents = [];
             
-            data.forEach(row => {
+            data.forEach((row, index) => {
                 // Procurar por uma coluna que contenha a data
                 let dateValue = null;
                 let dateColumn = null;
@@ -345,12 +450,16 @@
                                 }
                             }
                             
+                            // Adicionar índice da linha para referência
+                            const rowIndex = index + 2; // +2 porque normalmente a linha 1 é cabeçalho
+                            
                             // Criar objeto do evento
                             const event = {
                                 date: eventDate,
                                 title: title || 'Evento sem título',
                                 details: {},
-                                originalData: row
+                                originalData: row,
+                                rowIndex: rowIndex // Armazenar o índice da linha para referência
                             };
                             
                             // Adicionar todos os outros campos como detalhes
@@ -474,16 +583,21 @@
                 upcomingEvents.sort((a, b) => a.date - b.date).forEach(event => {
                     const card = document.createElement('div');
                     card.className = 'upcoming-card';
+                    card.dataset.eventId = event.id || generateEventId(event);
+                    card.dataset.rowIndex = event.rowIndex; // Adicionar índice da linha como data attribute
+                    
+                    // Adicionar título (Nome)
+                    let nomeValue = '';
+                    if (event.originalData.Nome) {
+                        nomeValue = event.originalData.Nome;
+                    } else if (event.title) {
+                        nomeValue = event.title;
+                    }
                     
                     const title = document.createElement('div');
                     title.className = 'event-title';
-                    title.textContent = event.title;
+                    title.textContent = nomeValue;
                     card.appendChild(title);
-                    
-                    const dateText = document.createElement('div');
-                    dateText.className = 'event-details';
-                    dateText.textContent = formatDate(event.date);
-                    card.appendChild(dateText);
                     
                     // Badge de dias restantes
                     const daysLeftBadge = document.createElement('div');
@@ -497,15 +611,103 @@
                     }
                     card.appendChild(daysLeftBadge);
                     
-                    // Adicionar detalhes adicionais se disponíveis
-                    for (const key in event.details) {
-                        if (event.details[key]) {
-                            const detail = document.createElement('div');
-                            detail.className = 'event-details';
-                            detail.textContent = `${key}: ${event.details[key]}`;
-                            card.appendChild(detail);
-                        }
+                    // Adicionar assunto se disponível
+                    if (event.originalData.Assunto) {
+                        const assuntoDetail = document.createElement('div');
+                        assuntoDetail.className = 'event-details';
+                        assuntoDetail.textContent = `Assunto: ${event.originalData.Assunto}`;
+                        card.appendChild(assuntoDetail);
                     }
+                    
+                    // Adicionar status se disponível
+                    if (event.originalData.Status) {
+                        const statusValue = event.originalData.Status.toLowerCase();
+                        const statusDetail = document.createElement('div');
+                        statusDetail.className = 'event-status';
+                        
+                        // Adicionar classe baseada no status
+                        if (statusValue.includes('conclu')) {
+                            statusDetail.classList.add('status-concluido');
+                        } else if (statusValue.includes('atras') || statusValue.includes('venc')) {
+                            statusDetail.classList.add('status-atrasado');
+                        } else {
+                            statusDetail.classList.add('status-pendente');
+                        }
+                        
+                        statusDetail.textContent = event.originalData.Status;
+                        card.appendChild(statusDetail);
+                    }
+                    
+                    // Mostrar comentário existente, se disponível
+                    if (event.originalData.Comentários) {
+                        const commentDisplay = document.createElement('div');
+                        commentDisplay.className = 'event-comment';
+                        commentDisplay.textContent = event.originalData.Comentários;
+                        card.appendChild(commentDisplay);
+                    }
+                    
+                    // Adicionar botões de ação
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = 'event-actions';
+                    
+                    // Botão de Drive se o link estiver disponível
+                    if (event.originalData['Link do Drive'] || event.originalData.Link) {
+                        const driveLink = event.originalData['Link do Drive'] || event.originalData.Link;
+                        const driveBtn = document.createElement('button');
+                        driveBtn.className = 'btn-drive';
+                        driveBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2H2v10h10V2z"/><path d="M12 12H2v10h10V12z"/><path d="M22 2h-10v10h10V2z"/><path d="M22 12h-10v10h10V12z"/></svg>Drive';
+                        driveBtn.onclick = function() {
+                            window.open(driveLink, '_blank');
+                        };
+                        actionDiv.appendChild(driveBtn);
+                    }
+                    
+                    // Botão de comentário
+                    const commentBtn = document.createElement('button');
+                    commentBtn.className = 'btn-comment';
+                    commentBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Comentar';
+                    commentBtn.onclick = function() {
+                        toggleCommentForm(card.dataset.eventId);
+                    };
+                    actionDiv.appendChild(commentBtn);
+                    
+                    card.appendChild(actionDiv);
+                    
+                    // Adicionar formulário de comentário (inicialmente oculto)
+                    const commentForm = document.createElement('div');
+                    commentForm.className = 'comment-form';
+                    commentForm.id = `comment-form-${card.dataset.eventId}`;
+                    
+                    const textarea = document.createElement('textarea');
+                    textarea.className = 'comment-textarea';
+                    textarea.placeholder = 'Digite seu comentário aqui...';
+                    // Preencher com comentário existente se disponível
+                    if (event.originalData.Comentários) {
+                        textarea.value = event.originalData.Comentários;
+                    }
+                    commentForm.appendChild(textarea);
+                    
+                    const commentActions = document.createElement('div');
+                    commentActions.className = 'comment-actions';
+                    
+                    const sendBtn = document.createElement('button');
+                    sendBtn.className = 'btn-send';
+                    sendBtn.textContent = 'Enviar';
+                    sendBtn.onclick = function() {
+                        submitComment(card.dataset.eventId, textarea.value, event.originalData, event.rowIndex);
+                    };
+                    commentActions.appendChild(sendBtn);
+                    
+                    const cancelBtn = document.createElement('button');
+                    cancelBtn.className = 'btn-cancel';
+                    cancelBtn.textContent = 'Cancelar';
+                    cancelBtn.onclick = function() {
+                        toggleCommentForm(card.dataset.eventId);
+                    };
+                    commentActions.appendChild(cancelBtn);
+                    
+                    commentForm.appendChild(commentActions);
+                    card.appendChild(commentForm);
                     
                     upcomingGrid.appendChild(card);
                 });
@@ -516,47 +718,49 @@
         function createEventCard(event) {
             const card = document.createElement('div');
             card.className = 'event-card';
+            card.dataset.eventId = event.id || generateEventId(event);
+            card.dataset.rowIndex = event.rowIndex; // Adicionar índice da linha como data attribute
+            
+            // Adicionar título (Nome)
+            let nomeValue = '';
+            if (event.originalData.Nome) {
+                nomeValue = event.originalData.Nome;
+            } else if (event.title) {
+                nomeValue = event.title;
+            }
             
             const title = document.createElement('div');
             title.className = 'event-title';
-            title.textContent = event.title;
+            title.textContent = nomeValue;
             card.appendChild(title);
             
-            // Adicionar detalhes se disponíveis
-            for (const key in event.details) {
-                if (event.details[key]) {
-                    const detail = document.createElement('div');
-                    detail.className = 'event-details';
-                    detail.textContent = `${key}: ${event.details[key]}`;
-                    card.appendChild(detail);
-                }
+            // Não mostrar a data novamente, já que está no cabeçalho do grupo
+            
+            // Adicionar assunto se disponível
+            if (event.originalData.Assunto) {
+                const assuntoDetail = document.createElement('div');
+                assuntoDetail.className = 'event-details';
+                assuntoDetail.textContent = `Assunto: ${event.originalData.Assunto}`;
+                card.appendChild(assuntoDetail);
             }
             
-            return card;
-        }
-        
-        // Função para formatar a data
-        function formatDate(date) {
-            const weekdays = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-            const day = date.getDate().toString().padStart(2, '0');
-            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            // Adicionar status se disponível
+            if (event.originalData.Status) {
+                const statusValue = event.originalData.Status.toLowerCase();
+                const statusDetail = document.createElement('div');
+                statusDetail.className = 'event-status';
+                
+                // Adicionar classe baseada no status
+                if (statusValue.includes('conclu')) {
+                    statusDetail.classList.add('status-concluido');
+                } else if (statusValue.includes('atras') || statusValue.includes('venc')) {
+                    statusDetail.classList.add('status-atrasado');
+                } else {
+                    statusDetail.classList.add('status-pendente');
+                }
+                
+                statusDetail.textContent = event.originalData.Status;
+                card.appendChild(statusDetail);
+            }
             
-            return `${weekdays[date.getDay()]}, ${day}/${month}/${date.getFullYear()}`;
-        }
-        
-        // Funções de navegação do calendário
-        function prevMonth() {
-            currentDisplayDate.setMonth(currentDisplayDate.getMonth() - 1);
-            updateCalendarView();
-        }
-        
-        function nextMonth() {
-            currentDisplayDate.setMonth(currentDisplayDate.getMonth() + 1);
-            updateCalendarView();
-        }
-        
-        // Carregar dados quando a página carrega
-        document.addEventListener('DOMContentLoaded', fetchData);
-    </script>
-</body>
-</html>
+            // Mostrar coment
