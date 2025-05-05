@@ -3,513 +3,228 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gerenciador de Processos</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <title>Visualizador de Dados</title>
     <style>
-        :root {
-            --primary: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --bg-light: #f3f4f6;
-        }
-        
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-light);
-        }
-        
-        .card {
-            transition: all 0.3s ease;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .calendar-section {
-            background: white;
-            border-radius: 15px;
+            font-family: Arial, sans-serif;
+            margin: 0;
             padding: 20px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            background-color: #f5f5f5;
         }
-        
-        .priority-section {
-            background: white;
-            border-radius: 15px;
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
             padding: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        
-        .priority-card {
-            border-left: 4px solid var(--danger);
-        }
-        
-        .upcoming-card {
-            border-left: 4px solid var(--warning);
-        }
-        
-        .status-badge {
-            border-radius: 12px;
-            padding: 4px 10px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-        
-        .status-priority {
-            background-color: #fee2e2;
-            color: #b91c1c;
-        }
-        
-        .status-concluido {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
-        
-        .status-pendente {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        
-        .status-default {
-            background-color: #e0e7ff;
-            color: #4338ca;
-        }
-        
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-radius: 50%;
-            border-top: 4px solid var(--primary);
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .comment-field {
-            transition: all 0.2s ease;
-        }
-        
-        .comment-field:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
-        }
-        
-        .refresh-btn {
-            background-color: var(--primary);
-            color: white;
             border-radius: 8px;
-            padding: 8px 16px;
-            transition: all 0.2s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-        
-        .refresh-btn:hover {
-            background-color: var(--primary-light);
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
         }
-        
-        .instructions {
-            background-color: #e0f2fe;
-            border-left: 4px solid #0284c7;
-            padding: 12px;
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #666;
+        }
+        .error {
+            background-color: #ffeeee;
+            color: #cc0000;
+            padding: 15px;
+            border-radius: 5px;
             margin-bottom: 20px;
-            border-radius: 6px;
+        }
+        
+        .info {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .btn-refresh {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .btn-refresh:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <div class="container mx-auto px-4 py-8">
-        <header class="mb-8 text-center">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">Gerenciador de Processos</h1>
-            <p class="text-gray-600">Organize seus processos e acompanhe prazos importantes</p>
-        </header>
+    <div class="container">
+        <h1>Agenda PSR</h1>
         
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800">Painel de Controle</h2>
-            <button id="refreshBtn" class="refresh-btn">
-                <i class="fas fa-sync-alt mr-2"></i>Atualizar Dados
-            </button>
-        </div>
+        <button class="btn-refresh" onclick="fetchData()">Atualizar Dados</button>
         
-        <div id="loading" class="loader"></div>
-        <div id="error" class="bg-red-100 text-red-700 p-4 rounded-lg mb-8 text-center hidden"></div>
+        <div id="error-message" class="error" style="display: none;"></div>
+        <div id="sheet-info" class="info" style="display: none;"></div>
         
-        <div id="dashboard" class="hidden">
-            <section class="calendar-section">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-gray-800">Calendário de Processos</h2>
-                </div>
-                <div id="calendar" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    <!-- Cards do calendário serão inseridos aqui pelo JavaScript -->
-                </div>
-            </section>
-            
-            <section class="priority-section">
-                <h2 class="text-xl font-bold text-gray-800 mb-6">Prioridades e Prazos Próximos</h2>
-                <div id="priorities" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <!-- Cards de prioridade serão inseridos aqui pelo JavaScript -->
-                </div>
-            </section>
+        <div id="loading" class="loading">Carregando dados...</div>
+        
+        <div id="data-container">
+            <table id="data-table" style="display: none;">
+                <thead id="table-header">
+                    <!-- Cabeçalhos dinâmicos serão inseridos aqui -->
+                </thead>
+                <tbody id="table-body">
+                    <!-- Dados dinâmicos serão inseridos aqui -->
+                </tbody>
+            </table>
         </div>
     </div>
 
     <script>
-        // Configurações
-        const MS_PER_DAY = 1000 * 60 * 60 * 24;
-        const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutos
-        const UPCOMING_DAYS = 5; // Dias para considerar como "próximos"
+        // URL do seu script do Google
+        const API_URL = 'https://script.google.com/macros/s/AKfycbz0GEt6JCPdzis6ZbORgXkienKmiaDZeI7PrHQsJ4af6HVydDIAUGb4ljlNCg8hQ_fx/exec';
         
-        // Elementos DOM
-        const refreshBtn = document.getElementById('refreshBtn');
-        const loadingEl = document.getElementById('loading');
-        const errorEl = document.getElementById('error');
-        const dashboardEl = document.getElementById('dashboard');
-        const calendarEl = document.getElementById('calendar');
-        const prioritiesEl = document.getElementById('priorities');
-        
-        // Estado da aplicação
-        let sheetData = [];
-        let sheetUrl = '';
-        let refreshTimer = null;
-        
-        // Função para formatar data
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
+        // Função para buscar os dados
+        function fetchData() {
+            const loadingElement = document.getElementById('loading');
+            const tableElement = document.getElementById('data-table');
+            const errorElement = document.getElementById('error-message');
             
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return dateStr;
+            // Mostrar loading e esconder tabela e erro
+            loadingElement.style.display = 'block';
+            tableElement.style.display = 'none';
+            errorElement.style.display = 'none';
             
-            const day = parts[0].padStart(2, '0');
-            const month = parts[1].padStart(2, '0');
-            const year = parts[2];
-            
-            return `${day}/${month}/${year}`;
-        }
-        
-        // Função para verificar se uma data está próxima
-        function isUpcoming(dateStr) {
-            if (!dateStr) return false;
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return false;
-            
-            const processDate = new Date(
-                parseInt(parts[2]), // ano
-                parseInt(parts[1]) - 1, // mês (0-11)
-                parseInt(parts[0]) // dia
-            );
-            
-            const diffDays = Math.floor((processDate - today) / MS_PER_DAY);
-            return diffDays >= 0 && diffDays <= UPCOMING_DAYS;
-        }
-        
-        // Função para verificar se uma data está no passado
-        function isPast(dateStr) {
-            if (!dateStr) return false;
-            
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            
-            const parts = dateStr.split('/');
-            if (parts.length !== 3) return false;
-            
-            const processDate = new Date(
-                parseInt(parts[2]), // ano
-                parseInt(parts[1]) - 1, // mês (0-11)
-                parseInt(parts[0]) // dia
-            );
-            
-            return processDate < today;
-        }
-        
-        // Função para criar um card
-        function createCard(process, index) {
-                            const isPriority = process.status && process.status.toLowerCase().includes('prioridade');
-            const isUpcomingDate = isUpcoming(process.data);
-            const isPastDate = isPast(process.data);
-            
-            // Determinar classes para o status
-            let statusClass = 'status-default';
-            if (process.status) {
-                const status = process.status.toLowerCase();
-                if (status.includes('prioridade')) {
-                    statusClass = 'status-priority';
-                } else if (status === 'concluído' || status === 'concluido') {
-                    statusClass = 'status-concluido';
-                } else if (status === 'pendente') {
-                    statusClass = 'status-pendente';
-                }
-            }
-            
-            // Criar elemento do card
-            const card = document.createElement('div');
-            card.className = `card bg-white ${isPriority ? 'priority-card' : ''} ${isUpcomingDate && !isPriority ? 'upcoming-card' : ''}`;
-            
-            // Estrutura interna do card
-            card.innerHTML = `
-                <div class="p-5">
-                    <div class="flex justify-between items-start mb-3">
-                        <h3 class="font-bold text-gray-800 text-lg">${process.nome || 'Sem nome'}</h3>
-                        <span class="status-badge ${statusClass}">${process.status || 'Sem status'}</span>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <p class="text-sm text-gray-500 flex items-center mb-1">
-                            <i class="far fa-calendar-alt mr-2"></i>
-                            <span class="${isPastDate ? 'text-red-600 font-semibold' : ''}">${formatDate(process.data) || 'Sem data'}</span>
-                        </p>
-                        <p class="text-sm text-gray-500 flex items-center">
-                            <i class="far fa-comment-dots mr-2"></i>
-                            <span>${process.assunto || 'Sem assunto'}</span>
-                        </p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <p class="text-sm text-gray-600">${process.observacao || 'Sem observações'}</p>
-                    </div>
-                    
-                    ${process.link ? `
-                    <div class="mb-4">
-                        <a href="${process.link}" target="_blank" class="text-blue-600 hover:text-blue-800 text-sm flex items-center">
-                            <i class="fas fa-external-link-alt mr-1"></i> Ver arte no Drive
-                        </a>
-                    </div>
-                    ` : ''}
-                    
-                    <div class="mt-4">
-                        <label for="comment-${index}" class="block text-sm font-medium text-gray-700 mb-1">Comentário:</label>
-                        <textarea 
-                            id="comment-${index}" 
-                            class="comment-field w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none" 
-                            rows="2"
-                            data-row-index="${index + 1}"
-                        >${process.comentarios || ''}</textarea>
-                        <button 
-                            class="mt-2 bg-green-500 text-white px-3 py-1 rounded-md text-sm hover:bg-green-600 save-comment-btn"
-                            data-index="${index}"
-                        >
-                            Salvar
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            return card;
-        }
-        
-        // Função para carregar dados da planilha
-        async function loadSheetData() {
-            if (!sheetUrl) {
-                displayError('URL da planilha não fornecida');
-                return;
-            }
-            
-            loadingEl.classList.remove('hidden');
-            errorEl.classList.add('hidden');
-            
-            try {
-                // Tentativa de carregar os dados da planilha publicada como CSV
-                const response = await fetch(sheetUrl);
-                
-                if (!response.ok) {
-                    throw new Error('Erro ao acessar a planilha. Verifique se ela está publicada corretamente.');
-                }
-                
-                const csvText = await response.text();
-                
-                // Conversão básica de CSV para array de objetos
-                const rows = csvText.split('\n');
-                const headers = rows[0].split(',').map(h => h.trim().toLowerCase());
-                
-                sheetData = [];
-                
-                for (let i = 1; i < rows.length; i++) {
-                    if (!rows[i].trim()) continue;
-                    
-                    const values = rows[i].split(',');
-                    const process = {};
-                    
-                    headers.forEach((header, index) => {
-                        if (index < values.length) {
-                            // Obter o valor e lidar com campos que podem conter vírgulas (entre aspas)
-            let value = '';
-            
-            // Se o valor começa com aspas, precisamos tratar diferente
-            if (values[index] && values[index].trim().startsWith('"')) {
-                // Encontrar o final do valor (próxima aspas seguida de vírgula ou final)
-                let valueBuilder = [values[index]];
-                let valueComplete = false;
-                let j = index;
-                
-                while (!valueComplete && j < values.length) {
-                    if (values[j].endsWith('"') || values[j].includes('",')) {
-                        valueComplete = true;
-                    } else if (j < values.length - 1) {
-                        j++;
-                        valueBuilder.push(values[j]);
-                    } else {
-                        valueComplete = true;
+            fetch(API_URL)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Erro na requisição: ${response.status}`);
                     }
-                }
-                
-                value = valueBuilder.join(',').trim();
-            } else {
-                value = values[index] ? values[index].trim() : '';
-                            
-                            // Remover aspas se existirem
-                            if (value.startsWith('"') && value.endsWith('"')) {
-                                value = value.substring(1, value.length - 1);
-                            }
-                            
-                            // Mapear cabeçalhos para nossos campos esperados
-                            if (header === 'a' || header === 'nome') {
-                                process.nome = value;
-                            } else if (header === 'b' || header === 'data') {
-                                process.data = value;
-                            } else if (header === 'c' || header === 'assunto') {
-                                process.assunto = value;
-                            } else if (header === 'd' || header === 'status') {
-                                process.status = value;
-                            } else if (header === 'e' || header === 'observacao' || header === 'observação') {
-                                process.observacao = value;
-                            } else if (header === 'f' || header === 'link') {
-                                process.link = value;
-                            } else if (header === 'g' || header === 'comentarios' || header === 'comentários') {
-                                process.comentarios = value;
-                            } else {
-                                process[header] = value;
-                            }
-                        }
-                    });
-                    
-                    sheetData.push(process);
-                }
-                
-                renderCards();
-                dashboardEl.classList.remove('hidden');
-                
-                // Configurar atualização automática
-                if (refreshTimer) {
-                    clearInterval(refreshTimer);
-                }
-                refreshTimer = setInterval(loadSheetData, REFRESH_INTERVAL);
-                
-            } catch (error) {
-                console.error('Erro ao carregar dados:', error);
-                displayError(error.message);
-            } finally {
-                loadingEl.classList.add('hidden');
-            }
-        }
-        
-        // Função para exibir erro
-        function displayError(message) {
-            errorEl.textContent = message;
-            errorEl.classList.remove('hidden');
-            dashboardEl.classList.add('hidden');
-        }
-        
-        // Adicionar funcionalidade para salvar comentários de volta na planilha
-        async function saveCommentToSheet(rowIndex, columnIndex, comment) {
-            // Esta é uma função simulada, já que precisaríamos da API Google Sheets completa
-            // para realmente escrever de volta na planilha
-            console.log(`Salvando comentário na linha ${rowIndex}, coluna ${columnIndex}: ${comment}`);
-            return true;
-        }
-        
-        // Função para renderizar os cards
-        function renderCards() {
-            // Limpar contêineres
-            calendarEl.innerHTML = '';
-            prioritiesEl.innerHTML = '';
-            
-            if (sheetData.length === 0) {
-                calendarEl.innerHTML = '<p class="col-span-full text-center text-gray-500">Nenhum processo encontrado</p>';
-                prioritiesEl.innerHTML = '<p class="col-span-full text-center text-gray-500">Nenhuma prioridade encontrada</p>';
-                return;
-            }
-            
-            // Verificar prioridades e datas próximas
-            let hasPriorities = false;
-            
-            // Criar cards para todos os processos no calendário
-            sheetData.forEach((process, index) => {
-                const card = createCard(process, index);
-                calendarEl.appendChild(card);
-                
-                // Verificar se é prioridade ou tem data próxima
-                const isPriority = process.status && process.status.toLowerCase().includes('prioridade');
-                const isUpcomingDate = isUpcoming(process.data);
-                
-                if (isPriority || isUpcomingDate) {
-                    const priorityCard = createCard(process, index);
-                    prioritiesEl.appendChild(priorityCard);
-                    hasPriorities = true;
-                }
-            });
-            
-            // Se não houver prioridades
-            if (!hasPriorities) {
-                prioritiesEl.innerHTML = '<p class="col-span-full text-center text-gray-500">Nenhuma prioridade ou prazo próximo encontrado</p>';
-            }
-            
-            // Adicionar eventos aos botões de salvar comentários
-            document.querySelectorAll('.save-comment-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const index = parseInt(this.getAttribute('data-index'));
-                    const textarea = document.getElementById(`comment-${index}`);
-                    const comment = textarea.value.trim();
-                    
-                    // Salvando o comentário
-                    const rowIndex = parseInt(textarea.getAttribute('data-row-index'));
-                    const savedSuccessfully = saveCommentToSheet(rowIndex, 7, comment); // Coluna G = 7
-                    
-                    if (savedSuccessfully) {
-                        // Mostrar uma notificação de sucesso
-                        const btn = this;
-                        btn.textContent = "Salvo!";
-                        btn.classList.add("bg-blue-500");
-                        btn.classList.remove("bg-green-500");
-                        
-                        setTimeout(() => {
-                            btn.textContent = "Salvar";
-                            btn.classList.add("bg-green-500");
-                            btn.classList.remove("bg-blue-500");
-                        }, 2000);
+                    return response.json();
+                })
+                .then(response => {
+                    // Verificar o status da resposta
+                    if (response.status === 'error') {
+                        throw new Error(response.message || 'Erro ao processar dados');
                     }
                     
-                    // Atualizar dados locais
-                    sheetData[index].comentarios = comment;
+                    // Verificar se temos dados
+                    if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {
+                        errorElement.innerHTML = `<strong>Aviso:</strong> Não foram encontrados dados na planilha.<br>
+                        <em>Detalhes: ${response.message || 'Planilha vazia ou apenas com cabeçalhos'}</em>`;
+                        errorElement.style.display = 'block';
+                        loadingElement.style.display = 'none';
+                        return;
+                    }
+                    
+                    // Processamento bem-sucedido
+                    console.log('Dados recebidos:', response);
+                    displayData(response.data, response.columns);
+                    
+                    // Adicionar informações extras
+                    const infoText = `Planilha: ${response.sheetName || 'N/A'} | Total de registros: ${response.totalRows || response.data.length}`;
+                    document.getElementById('sheet-info').textContent = infoText;
+                    document.getElementById('sheet-info').style.display = 'block';
+                    
+                    loadingElement.style.display = 'none';
+                    tableElement.style.display = 'table';
+                })
+                .catch(error => {
+                    // Tratamento de erro
+                    console.error('Erro:', error);
+                    errorElement.innerHTML = `<strong>Erro ao carregar os dados:</strong><br>${error.message}<br><br>
+                    <em>Verifique o console do navegador para mais detalhes (F12)</em>`;
+                    errorElement.style.display = 'block';
+                    loadingElement.style.display = 'none';
                 });
+        }
+        
+        // Função para exibir os dados na tabela
+        function displayData(data, columns) {
+            const tableHeader = document.getElementById('table-header');
+            const tableBody = document.getElementById('table-body');
+            
+            // Limpar conteúdo atual
+            tableHeader.innerHTML = '';
+            tableBody.innerHTML = '';
+            
+            // Criar cabeçalhos da tabela
+            const headerRow = document.createElement('tr');
+            
+            // Usar as colunas se fornecidas, caso contrário extrair do primeiro item
+            const headers = columns || Object.keys(data[0]);
+            
+            headers.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                headerRow.appendChild(th);
+            });
+            
+            tableHeader.appendChild(headerRow);
+            
+            // Criar linhas de dados
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                headers.forEach(header => {
+                    const td = document.createElement('td');
+                    const value = row[header];
+                    
+                    // Tratamento especial para diferentes tipos de dados
+                    if (header.toLowerCase().includes('link') && value) {
+                        // Se for um link, cria um elemento <a>
+                        const link = document.createElement('a');
+                        link.href = value;
+                        link.textContent = 'Abrir';
+                        link.target = '_blank';
+                        td.appendChild(link);
+                    } else if (header.toLowerCase().includes('data') && value) {
+                        // Formatar data se possível
+                        try {
+                            const date = new Date(value);
+                            if (!isNaN(date)) {
+                                td.textContent = date.toLocaleDateString('pt-BR');
+                            } else {
+                                td.textContent = value || '';
+                            }
+                        } catch {
+                            td.textContent = value || '';
+                        }
+                    } else {
+                        // Valor padrão
+                        td.textContent = value || '';
+                    }
+                    
+                    tr.appendChild(td);
+                });
+                
+                tableBody.appendChild(tr);
             });
         }
         
-        // Configurar eventos
-        refreshBtn.addEventListener('click', loadSheetData);
-        
-        refreshBtn.addEventListener('click', loadSheetData);
-        
-        // Usar diretamente a URL da planilha fornecida
-        sheetUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vShqjOLg7SmO5NW8kJ4zYkzGRebV_45SXow4XxRrGKoocbN4Ybba9Db2RC6RU8ICQnx0E9SZPhWTvps/pub?gid=0&single=true&output=csv";
-        
-        // Carregar dados automaticamente ao iniciar
-        document.addEventListener('DOMContentLoaded', function() {
-            loadSheetData();
-        });
+        // Carregar dados quando a página carrega
+        document.addEventListener('DOMContentLoaded', fetchData);
     </script>
 </body>
 </html>
